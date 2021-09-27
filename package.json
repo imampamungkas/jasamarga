@@ -1,0 +1,45 @@
+{
+  "name": "backend-web-jasamarga",
+  "version": "1.0.0",
+  "description": "API endpoint for Web Jasamarga ",
+  "homepage": "https://jasamarga.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/it-jasamarga/backend-web-korporat.git"
+  },
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "nodejs",
+    "express",
+    "sequelize",
+    "mysql",
+    "rest",
+    "api"
+  ],
+  "author": "Widodo Pangestu <wid.pangestu@gmail.com> (https://web.facebook.com/widodopangestu/)",
+  "license": "ISC",
+  "dependencies": {
+    "@widodopangestu/node-ews": "^4.1.3",
+    "bcrypt": "^5.0.1",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "express-paginate": "^1.0.2",
+    "express-session": "^1.17.2",
+    "express-validator": "^6.12.0",
+    "file-type": "^16.5.0",
+    "jsonwebtoken": "^8.5.1",
+    "moment": "^2.29.1",
+    "mustache": "^4.2.0",
+    "mysql2": "^2.3.0",
+    "passport": "^0.4.1",
+    "passport-jwt": "^4.0.0",
+    "passport-local": "^1.0.0",
+    "sequelize": "^6.6.5",
+    "sequelize-slugify": "^1.6.0"
+  }
+}

@@ -1,0 +1,42 @@
+module.exports = (app) => {
+  const passport = require("passport");
+  const infografis = require("../controllers/public/infografis.controller.js");
+  const pejabat = require("../controllers/public/pejabat.controller.js");
+  const penghargaan = require("../controllers/public/penghargaan.controller.js");
+  const dokumen = require("../controllers/public/dokumen.controller.js");
+  const asean = require("../controllers/public/asean.controller.js");
+  const kantor = require("../controllers/public/kantor.controller.js");
+  var router = require("express").Router();
+
+  // Retrieve all infografis
+  router.get("/infografis/:tipe", infografis.findAll);
+  // Retrieve infografis
+  router.get("/infografis/:tipe/:id", infografis.findOne);
+
+  // Retrieve all pejabat
+  router.get("/pejabat/:tipe", pejabat.findAll);
+  // Retrieve pejabat
+  router.get("/pejabat/:tipe/:id", pejabat.findOne);
+
+  // Retrieve all penghargaan
+  router.get("/penghargaan", penghargaan.findAll);
+  // Retrieve penghargaan
+  router.get("/penghargaan/:id", penghargaan.findByPk);
+
+  // Retrieve all dokumen
+  router.get("/dokumen/:tipe", dokumen.findAll);
+  // Retrieve dokumen
+  router.get("/dokumen/:tipe/:id", dokumen.findOne);
+
+  // Retrieve all asean
+  router.get("/asean", asean.findAll);
+  // Retrieve asean
+  router.get("/asean/:id", asean.findByPk);
+
+  // Retrieve all kantor
+  router.get("/kantor", kantor.findAll);
+  // Retrieve kantor
+  router.get("/kantor/:id", kantor.findByPk);
+
+  app.use("/api/public", router);
+};

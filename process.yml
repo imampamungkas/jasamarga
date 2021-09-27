@@ -1,0 +1,25 @@
+apps:
+  - script: "./server.js"
+    exec_mode: "fork"
+    name: "pangestu-worker-0"
+    env:
+      PORT: 3500
+      NODE_ENV: production
+  - script: "./server.js"
+    exec_mode: "fork"
+    name: "pangestu-worker-1"
+    env:
+      PORT: 3501
+      NODE_ENV: production
+  - script: "./server.js"
+    exec_mode: "fork"
+    name: "pangestu-worker-2"
+    env:
+      PORT: 3502
+      NODE_ENV: production
+  - script: "./server.js"
+    exec_mode: "fork"
+    name: "pangestu-worker-3"
+    env:
+      PORT: 3503
+      NODE_ENV: production
