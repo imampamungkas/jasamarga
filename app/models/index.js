@@ -25,7 +25,8 @@ db.penghargaan = require("./penghargaan.model.js")(sequelize, Sequelize);
 db.dokumen = require("./dokumen.model.js")(sequelize, Sequelize);
 db.asean = require("./asean.model.js")(sequelize, Sequelize);
 db.kantor = require("./kantor.model.js")(sequelize, Sequelize);
-db.news = require("./informasi.model.js")(sequelize, Sequelize);
+db.artikel = require("./artikel.model.js")(sequelize, Sequelize);
+db.gambar = require("./gambar.model.js")(sequelize, Sequelize);
 db.tokens = require("./token.model.js")(sequelize, Sequelize);
 db.refresTokens = require("./refresh_token.model.js")(sequelize, Sequelize);
 
@@ -36,4 +37,9 @@ db.tokens.belongsTo(db.users, {
   as: "user",
 });
 
+db.artikel.hasMany(db.gambar, { as: "gambar" });
+db.gambar.belongsTo(db.artikel, {
+  foreignKey: "artikelUuid",
+  as: "artikel",
+});
 module.exports = db;

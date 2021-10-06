@@ -57,6 +57,7 @@ require("./app/routes/infografis.routes")(app);
 require("./app/routes/pejabat.routes")(app);
 require("./app/routes/penghargaan.routes")(app);
 require("./app/routes/dokumen.routes")(app);
+require("./app/routes/artikel.routes")(app);
 require("./app/routes/asean.routes")(app);
 require("./app/routes/kantor.routes")(app);
 var upload = require("./upload.js");
