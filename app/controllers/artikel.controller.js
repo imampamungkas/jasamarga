@@ -101,7 +101,7 @@ exports.findAll = (req, res) => {
         ? {
             [Op.or]: [
               { judul: { [Op.like]: `%${search}%` } },
-              { gambar_file: { [Op.like]: `%${search}%` } },
+              { teks: { [Op.like]: `%${search}%` } },
             ],
           }
         : null,
@@ -145,7 +145,7 @@ exports.findAll = (req, res) => {
     });
 };
 
-// Find a single Artikel with an id
+// Find a single Artikel with an uuid
 exports.findOne = (req, res) => {
   const tipe = req.params.tipe;
   const uuid = req.params.uuid;
@@ -157,7 +157,7 @@ exports.findOne = (req, res) => {
     .then((data) => {
       if (data == null) {
         res.status(404).send({
-          message: "Error retrieving Artikel with id=" + id,
+          message: "Error retrieving Artikel with uuid=" + uuid,
         });
       } else {
         res.send(data);
@@ -165,12 +165,12 @@ exports.findOne = (req, res) => {
     })
     .catch((err) => {
       res.status(500).send({
-        message: "Error retrieving Artikel with id=" + id,
+        message: "Error retrieving Artikel with uuid=" + uuid,
       });
     });
 };
 
-// Update a Artikel by the id in the request
+// Update a Artikel by the uuid in the request
 exports.update = async (req, res) => {
   const tipe = req.params.tipe;
   const uuid = req.params.uuid;
@@ -218,7 +218,7 @@ exports.update = async (req, res) => {
     .then((data) => {
       if (data == null) {
         res.status(404).send({
-          message: "Error updating Artikel with id=" + id,
+          message: "Error updating Artikel with uuid=" + uuid,
         });
       } else {
         if (data.gambar_file !== null) {
@@ -251,12 +251,12 @@ exports.update = async (req, res) => {
     .catch((err) => {
       console.log("err", err);
       res.status(500).send({
-        message: "Error updating Artikel with id=" + id,
+        message: "Error updating Artikel with uuid=" + uuid,
       });
     });
 };
 
-// Delete a Artikel with the specified id in the request
+// Delete a Artikel with the specified uuid in the request
 exports.delete = (req, res) => {
   const tipe = req.params.tipe;
   const uuid = req.params.uuid;
@@ -267,7 +267,7 @@ exports.delete = (req, res) => {
     .then((data) => {
       if (data == null) {
         res.status(404).send({
-          message: "Error deleting Artikel with id=" + id,
+          message: "Error deleting Artikel with uuid=" + uuid,
         });
       } else {
         if (data.gambar_file !== null) {
@@ -298,7 +298,7 @@ exports.delete = (req, res) => {
     .catch((err) => {
       console.log("err", err);
       res.status(500).send({
-        message: "Error deleting Artikel with id=" + id,
+        message: "Error deleting Artikel with uuid=" + uuid,
       });
     });
 };

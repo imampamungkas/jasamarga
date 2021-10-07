@@ -6,6 +6,7 @@ module.exports = (app) => {
   const dokumen = require("../controllers/public/dokumen.controller.js");
   const asean = require("../controllers/public/asean.controller.js");
   const kantor = require("../controllers/public/kantor.controller.js");
+  const artikel = require("../controllers/public/artikel.controller.js");
   var router = require("express").Router();
 
   // Retrieve all infografis
@@ -37,6 +38,11 @@ module.exports = (app) => {
   router.get("/kantor", kantor.findAll);
   // Retrieve kantor
   router.get("/kantor/:id", kantor.findByPk);
+
+  // Retrieve all artikel
+  router.get("/artikel/:tipe", artikel.findAll);
+  // Retrieve artikel
+  router.get("/artikel/:tipe/:slug", artikel.findBySlug);
 
   app.use("/api/public", router);
 };

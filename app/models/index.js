@@ -37,7 +37,11 @@ db.tokens.belongsTo(db.users, {
   as: "user",
 });
 
-db.artikel.hasMany(db.gambar, { as: "gambar" });
+db.artikel.hasMany(db.gambar, {
+  as: "gambar",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
 db.gambar.belongsTo(db.artikel, {
   foreignKey: "artikelUuid",
   as: "artikel",
