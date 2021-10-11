@@ -35,7 +35,7 @@ exports.create = async (req, res) => {
     teks: req.body.teks,
     web_url: req.body.web_url,
     youtube_url: req.body.youtube_url,
-    gambar_file: file_name,
+    kelompok: req.body.kelompok,
     tipe: tipe,
   };
 
@@ -113,6 +113,7 @@ exports.findAll = (req, res) => {
   const nopage = req.query.nopage || 0;
   const search = req.query.search;
   const status = req.query.status;
+  const kelompok = req.query.kelompok;
   var condition = {
     [Op.and]: [
       search
@@ -125,6 +126,7 @@ exports.findAll = (req, res) => {
         : null,
       status ? { status: status } : null,
       lang ? { lang: lang } : null,
+      kelompok ? { kelompok: kelompok } : null,
       { tipe: tipe },
     ],
   };
@@ -279,15 +281,15 @@ exports.update = async (req, res) => {
           });
         }
         if (data.dokumen_file !== null) {
-            var dir = data.dokumen_file.split("/");
-            console.log("dir", dir);
-            path = `public/uploads/${dir[0]}/${dir[1]}`;
-            fs.rm(path, { recursive: true }, (err) => {
-              if (err) {
-                console.log("err : ", err);
-              }
-            });
-          }
+          var dir = data.dokumen_file.split("/");
+          console.log("dir", dir);
+          path = `public/uploads/${dir[0]}/${dir[1]}`;
+          fs.rm(path, { recursive: true }, (err) => {
+            if (err) {
+              console.log("err : ", err);
+            }
+          });
+        }
         data.update(artikel);
         res.send({
           message: "Artikel was updated successfully.",

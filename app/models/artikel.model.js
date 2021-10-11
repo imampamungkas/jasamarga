@@ -12,7 +12,7 @@ module.exports = (sequelize, Sequelize) => {
       lang: {
         type: Sequelize.STRING(2),
         defaultValue: "id",
-        allowNull: false
+        allowNull: false,
       },
       slug: {
         type: Sequelize.STRING,
@@ -21,14 +21,18 @@ module.exports = (sequelize, Sequelize) => {
       tipe: {
         type: Sequelize.STRING,
         defaultValue: "news",
-        allowNull: false
+        allowNull: false,
       },
       judul: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
       },
       teks: {
         type: Sequelize.TEXT("long"),
+      },
+      kelompok: {
+        type: Sequelize.STRING,
+        defaultValue: null,
       },
       gambar_file: {
         type: Sequelize.STRING,

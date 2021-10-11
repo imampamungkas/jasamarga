@@ -8,6 +8,7 @@ exports.findAll = (req, res) => {
   const nopage = req.query.nopage || 0;
   const search = req.query.search;
   const tipe = req.params.tipe;
+  const kelompok = req.params.kelompok;
 
   var condition = {
     [Op.and]: [
@@ -19,6 +20,7 @@ exports.findAll = (req, res) => {
             ],
           }
         : null,
+      kelompok ? { kelompok: kelompok } : null,
       { status: "publish" },
       { tipe: tipe },
       { lang: lang },
