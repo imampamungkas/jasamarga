@@ -75,6 +75,24 @@ exports.create = async (req, res) => {
     }
   }
 
+  if (req.body.hasOwnProperty("dokumen_file")) {
+    if (req.body.dokumen_file) {
+      var file_name = req.body.dokumen_file.nama;
+      const b = Buffer.from(req.body.dokumen_file.data, "base64");
+      const timestamp = `artikel-${tipe}/${new Date().getTime()}`;
+      var dir = `public/uploads/${timestamp}/`;
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      fs.writeFile(dir + file_name, b, function (err) {
+        if (!err) {
+          console.log("file is created", file_name);
+        }
+      });
+      artikel["dokumen_file"] = `${timestamp}/${file_name}`;
+    }
+  }
+
   // Save Artikel in the database
   Artikel.create(artikel)
     .then((data) => {
@@ -212,6 +230,25 @@ exports.update = async (req, res) => {
       artikel["video_file"] = `${timestamp}/${file_name}`;
     }
   }
+
+  if (req.body.hasOwnProperty("dokumen_file")) {
+    if (req.body.dokumen_file) {
+      var file_name = req.body.dokumen_file.nama;
+      const b = Buffer.from(req.body.dokumen_file.data, "base64");
+      const timestamp = `artikel-${tipe}/${new Date().getTime()}`;
+      var dir = `public/uploads/${timestamp}/`;
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      fs.writeFile(dir + file_name, b, function (err) {
+        if (!err) {
+          console.log("file is created", file_name);
+        }
+      });
+      artikel["dokumen_file"] = `${timestamp}/${file_name}`;
+    }
+  }
+
   Artikel.findOne({
     where: { [Op.and]: [{ uuid: uuid }, { tipe: tipe }] },
   })
@@ -241,6 +278,16 @@ exports.update = async (req, res) => {
             }
           });
         }
+        if (data.dokumen_file !== null) {
+            var dir = data.dokumen_file.split("/");
+            console.log("dir", dir);
+            path = `public/uploads/${dir[0]}/${dir[1]}`;
+            fs.rm(path, { recursive: true }, (err) => {
+              if (err) {
+                console.log("err : ", err);
+              }
+            });
+          }
         data.update(artikel);
         res.send({
           message: "Artikel was updated successfully.",
@@ -281,6 +328,15 @@ exports.delete = (req, res) => {
         }
         if (data.video_file !== null) {
           var dir = data.video_file.split("/");
+          path = `public/uploads/${dir[0]}/${dir[1]}`;
+          fs.rm(path, { recursive: true }, (err) => {
+            if (err) {
+              console.log("err : ", err);
+            }
+          });
+        }
+        if (data.dokumen_file !== null) {
+          var dir = data.dokumen_file.split("/");
           path = `public/uploads/${dir[0]}/${dir[1]}`;
           fs.rm(path, { recursive: true }, (err) => {
             if (err) {
