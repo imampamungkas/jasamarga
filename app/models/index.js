@@ -26,6 +26,7 @@ db.penghargaan = require("./penghargaan.model.js")(sequelize, Sequelize);
 db.penghargaanI18n = require("./penghargaan-i18n.model.js")(sequelize, Sequelize);
 db.dokumen = require("./dokumen.model.js")(sequelize, Sequelize);
 db.asean = require("./asean.model.js")(sequelize, Sequelize);
+db.aseanI18n = require("./asean-i18n.model.js")(sequelize, Sequelize);
 db.kantor = require("./kantor.model.js")(sequelize, Sequelize);
 db.artikel = require("./artikel.model.js")(sequelize, Sequelize);
 db.gambar = require("./gambar.model.js")(sequelize, Sequelize);
@@ -66,5 +67,14 @@ db.penghargaan.hasMany(db.penghargaanI18n, {
 });
 db.penghargaanI18n.belongsTo(db.penghargaan, {
   as: "penghargaan",
+});
+
+db.asean.hasMany(db.aseanI18n, {
+  as: "i18n",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+db.aseanI18n.belongsTo(db.asean, {
+  as: "asean",
 });
 module.exports = db;

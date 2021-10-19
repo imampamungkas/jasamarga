@@ -109,25 +109,3 @@ exports.findOne = (req, res) => {
       });
     });
 };
-
-// Find a single Penghargaan with an uuid
-exports.findBySlug = (req, res) => {
-  const lang = req.query.lang || "uuid";
-  const slug = req.params.slug;
-
-  Penghargaan.findOne({ where: { slug: slug, lang: lang } })
-    .then((data) => {
-      if (data == null) {
-        res.status(404).send({
-          message: "Error retrieving Penghargaan with uuid=" + uuid,
-        });
-      } else {
-        res.send(data);
-      }
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: "Error retrieving Penghargaan with uuid=" + uuid,
-      });
-    });
-};

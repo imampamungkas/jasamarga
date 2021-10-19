@@ -12,17 +12,14 @@ module.exports = (app) => {
   // Retrieve all asean
   router.get("/", asean.findAll);
 
-  // Retrieve a single asean with id
-  router.get("/:id", asean.findOne);
+  // Retrieve a single asean with uuid
+  router.get("/:uuid", asean.findOne);
 
-  // Update a asean with id
-  router.put("/:id", asean.validate("updateAsean"), asean.update);
+  // Update a asean with uuid
+  router.put("/:uuid", asean.validate("updateAsean"), asean.update);
 
-  // Update a asean with id
-  router.put("/", asean.updateBulk);
-
-  // Delete a asean with id
-  router.delete("/:id", asean.delete);
+  // Delete a asean with uuid
+  router.delete("/:uuid", asean.delete);
 
   // Delete all asean
   router.delete("/", asean.deleteAll);

@@ -1,6 +1,7 @@
 const paginate = require("express-paginate");
 const db = require("../../models");
 const Asean = db.asean;
+const AseanI18n = db.aseanI18n;
 const Op = db.Sequelize.Op;
 
 exports.findAll = (req, res) => {
@@ -8,41 +9,62 @@ exports.findAll = (req, res) => {
   const nopage = req.query.nopage || 0;
   const search = req.query.search;
 
+
   var condition = {
     [Op.and]: [
       search
         ? {
-            [Op.or]: [
-              { grup: { [Op.like]: `%${search}%` } },
-              { no_ref: { [Op.like]: `%${search}%` } },
-              { pertanyaan: { [Op.like]: `%${search}%` } },
-              { implementasi: { [Op.like]: `%${search}%` } },
-              { sumber_judul: { [Op.like]: `%${search}%` } },
-            ],
-          }
+          [Op.or]: [
+            { sumber_link: { [Op.like]: `%${search}%` } },
+          ],
+        }
         : null,
-      { status: "publish" },
-      { lang: lang },
+    ],
+  };
+
+  var condition_i18n = {
+    [Op.and]: [
+      search
+        ? {
+          [Op.or]: [
+            { '$i18n.grup$': { [Op.like]: `%${search}%` } },
+            { '$i18n.no_ref$': { [Op.like]: `%${search}%` } },
+            { '$i18n.pertanyaan$': { [Op.like]: `%${search}%` } },
+            { '$i18n.implementasi$': { [Op.like]: `%${search}%` } },
+            { '$i18n.sumber_judul$': { [Op.like]: `%${search}%` } },
+          ],
+        }
+        : null,
     ],
   };
   var query =
     nopage == 1
       ? Asean.findAll({
-          where: condition,
+        where: condition,
+        include: {
+          model: AseanI18n,
+          as: 'i18n',
+          where: condition_i18n,
           order: [
             ["grup", "ASC"],
             ["no_ref", "ASC"],
           ],
-        })
+        },
+      })
       : Asean.findAndCountAll({
-          where: condition,
-          limit: req.query.limit,
-          offset: req.skip,
+        where: condition,
+        include: {
+          model: AseanI18n,
+          as: 'i18n',
+          where: condition_i18n,
           order: [
             ["grup", "ASC"],
             ["no_ref", "ASC"],
           ],
-        });
+        },
+        limit: req.query.limit,
+        offset: req.skip,
+      });
   query
     .then((results) => {
       if (nopage == 1) {
@@ -65,15 +87,23 @@ exports.findAll = (req, res) => {
     });
 };
 
-// Find a single Asean with an id
+// Find a single Asean with an uuid
 exports.findByPk = (req, res) => {
-  const id = req.params.id;
+  const uuid = req.params.uuid;
+  const lang = req.query.lang || "id";
 
-  Asean.findOne({ where: { id: id } })
+  Asean.findOne({
+    where: { uuid: uuid },
+    include: {
+      model: AseanI18n,
+      as: 'i18n',
+      where: { '$i18n.lang$': lang },
+    }
+  })
     .then((data) => {
       if (data == null) {
         res.status(404).send({
-          message: "Error retrieving Asean with id=" + id,
+          message: "Error retrieving Asean with uuid=" + uuid,
         });
       } else {
         res.send(data);
@@ -81,7 +111,7 @@ exports.findByPk = (req, res) => {
     })
     .catch((err) => {
       res.status(500).send({
-        message: "Error retrieving Asean with id=" + id,
+        message: "Error retrieving Asean with uuid=" + uuid,
       });
     });
 };

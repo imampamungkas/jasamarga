@@ -32,7 +32,7 @@ module.exports = (app) => {
   // Retrieve all asean
   router.get("/asean", asean.findAll);
   // Retrieve asean
-  router.get("/asean/:id", asean.findByPk);
+  router.get("/asean/:uuid", asean.findByPk);
 
   // Retrieve all kantor
   router.get("/kantor", kantor.findAll);

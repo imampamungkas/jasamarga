@@ -1,22 +1,21 @@
 const paginate = require("express-paginate");
-const fs = require("fs");
 const db = require("../models");
 const Asean = db.asean;
+const AseanI18n = db.aseanI18n;
 const Op = db.Sequelize.Op;
 
 const { body } = require("express-validator");
 const { validationResult } = require("express-validator");
-const { timeStamp } = require("console");
 
 exports.validate = (method) => {
   switch (method) {
     case "createAsean": {
       return [
-        body("grup").exists(),
-        body("no_ref").exists(),
-        body("pertanyaan").exists(),
-        body("implementasi").exists(),
-        body("sumber_judul").exists(),
+        // body("grup").exists(),
+        // body("no_ref").exists(),
+        // body("pertanyaan").exists(),
+        // body("implementasi").exists(),
+        // body("sumber_judul").exists(),
         body("sumber_link").exists(),
       ];
     }
@@ -35,20 +34,18 @@ exports.create = async (req, res) => {
     return;
   }
 
-  // Create a Asean
-  const asean = {
-    lang: req.body.lang || "id",
-    grup: req.body.grup,
-    no_ref: req.body.no_ref,
-    pertanyaan: req.body.pertanyaan,
-    implementasi: req.body.implementasi,
-    sumber_judul: req.body.sumber_judul,
-    sumber_link: req.body.sumber_link,
-  };
+  const { i18n, ...asean } = req.body;
 
   // Save Asean in the database
   Asean.create(asean)
-    .then((data) => {
+    .then(async (data) => {
+      if (i18n instanceof Array && i18n.length > 0) {
+        for (var i = 0; i < i18n.length; i++) {
+          i18n[i]["aseanUuid"] = data.uuid;
+          await AseanI18n.create(i18n[i]);
+        }
+        await data.reload({ include: 'i18n' });
+      }
       res.send(data);
     })
     .catch((err) => {
@@ -60,46 +57,65 @@ exports.create = async (req, res) => {
 
 // Retrieve all Asean from the database.
 exports.findAll = (req, res) => {
-  const lang = req.query.lang;
   const nopage = req.query.nopage || 0;
   const search = req.query.search;
-  const status = req.query.status;
+
   var condition = {
     [Op.and]: [
       search
         ? {
-            [Op.or]: [
-              { grup: { [Op.like]: `%${search}%` } },
-              { no_ref: { [Op.like]: `%${search}%` } },
-              { pertanyaan: { [Op.like]: `%${search}%` } },
-              { implementasi: { [Op.like]: `%${search}%` } },
-              { sumber_judul: { [Op.like]: `%${search}%` } },
-            ],
-          }
+          [Op.or]: [
+            { sumber_link: { [Op.like]: `%${search}%` } },
+          ],
+        }
         : null,
-      status ? { status: status } : null,
-      lang ? { lang: lang } : null,
+    ],
+  };
+
+  var condition_i18n = {
+    [Op.and]: [
+      search
+        ? {
+          [Op.or]: [
+            { '$i18n.grup$': { [Op.like]: `%${search}%` } },
+            { '$i18n.no_ref$': { [Op.like]: `%${search}%` } },
+            { '$i18n.pertanyaan$': { [Op.like]: `%${search}%` } },
+            { '$i18n.implementasi$': { [Op.like]: `%${search}%` } },
+            { '$i18n.sumber_judul$': { [Op.like]: `%${search}%` } },
+          ],
+        }
+        : null,
     ],
   };
 
   var query =
     nopage == 1
       ? Asean.findAll({
-          where: condition,
+        where: condition,
+        include: {
+          model: AseanI18n,
+          as: 'i18n',
+          where: condition_i18n,
           order: [
             ["grup", "ASC"],
             ["no_ref", "ASC"],
           ],
-        })
+        },
+      })
       : Asean.findAndCountAll({
-          where: condition,
-          limit: req.query.limit,
-          offset: req.skip,
+        where: condition,
+        include: {
+          model: AseanI18n,
+          as: 'i18n',
+          where: condition_i18n,
           order: [
             ["grup", "ASC"],
             ["no_ref", "ASC"],
           ],
-        });
+        },
+        limit: req.query.limit,
+        offset: req.skip,
+      });
   query
     .then((results) => {
       if (nopage == 1) {
@@ -122,15 +138,18 @@ exports.findAll = (req, res) => {
     });
 };
 
-// Find a single Asean with an id
+// Find a single Asean with an uuid
 exports.findOne = (req, res) => {
-  const id = req.params.id;
+  const uuid = req.params.uuid;
 
-  Asean.findByPk(id)
+  Asean.findOne({
+    where: { uuid: uuid },
+    include: 'i18n'
+  })
     .then((data) => {
       if (data == null) {
         res.status(404).send({
-          message: "Error retrieving Asean with id=" + id,
+          message: "Error retrieving Asean with uuid=" + uuid,
         });
       } else {
         res.send(data);
@@ -138,23 +157,32 @@ exports.findOne = (req, res) => {
     })
     .catch((err) => {
       res.status(500).send({
-        message: "Error retrieving Asean with id=" + id,
+        message: "Error retrieving Asean with uuid=" + uuid,
       });
     });
 };
 
-// Update a Asean by the id in the request
+// Update a Asean by the uuid in the request
 exports.update = async (req, res) => {
-  const id = req.params.id;
-  let asean = req.body;
-  Asean.findByPk(id)
-    .then((data) => {
+  const uuid = req.params.uuid;
+  const { i18n, ...asean } = req.body;
+  Asean.findByPk(uuid)
+    .then(async (data) => {
       if (data == null) {
         res.status(404).send({
-          message: "Error updating Asean with id=" + id,
+          message: "Error updating Asean with uuid=" + uuid,
         });
       } else {
         data.update(asean);
+        if (i18n instanceof Array && i18n.length > 0) {
+          for (var i = 0; i < i18n.length; i++) {
+            const { lang, ...trans } = i18n[i];
+            await AseanI18n.update(trans, {
+              where: { [Op.and]: [{ aseanUuid: uuid }, { lang: lang }] },
+            });
+          }
+          await data.reload({ include: 'i18n' });
+        }
         res.send({
           message: "Asean was updated successfully.",
           data: data,
@@ -164,49 +192,20 @@ exports.update = async (req, res) => {
     .catch((err) => {
       console.log("err", err);
       res.status(500).send({
-        message: "Error updating Asean with id=" + id,
+        message: "Error updating Asean with uuid=" + uuid,
       });
     });
 };
 
-// Update a Asean by the id in the request
-exports.updateBulk = async (req, res) => {
-  const data = req.body.data;
-  let messages = [];
-  if (data instanceof Array && data.length > 0) {
-    for (var i = 0; i < data.length; i++) {
-      const id = data[i].id;
-      delete data[i].id;
-      var result = await Asean.update(data[i], {
-        where: { id: id },
-      });
-      if (result[0] > 0) {
-        messages.push(`Asean with id ${id} was updated successfully.`);
-      } else {
-        messages.push(
-          `Cannot update Asean with id=${id}. Maybe Asean was not found or req.body is empty!`
-        );
-      }
-    }
-    res.send({
-      message: messages,
-    });
-  } else {
-    res.status(400).send({
-      message: "Invalid JSON data!",
-    });
-  }
-};
-
-// Delete a Asean with the specified id in the request
+// Delete a Asean with the specified uuid in the request
 exports.delete = (req, res) => {
-  const id = req.params.id;
+  const uuid = req.params.uuid;
 
-  Asean.findByPk(id)
+  Asean.findByPk(uuid)
     .then((data) => {
       if (data == null) {
         res.status(404).send({
-          message: "Error deleting Asean with id=" + id,
+          message: "Error deleting Asean with uuid=" + uuid,
         });
       } else {
         data.destroy();
@@ -219,7 +218,7 @@ exports.delete = (req, res) => {
     .catch((err) => {
       console.log("err", err);
       res.status(500).send({
-        message: "Error deleting Asean with id=" + id,
+        message: "Error deleting Asean with uuid=" + uuid,
       });
     });
 };
