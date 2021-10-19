@@ -22,7 +22,7 @@ module.exports = (app) => {
   // Retrieve all penghargaan
   router.get("/penghargaan", penghargaan.findAll);
   // Retrieve penghargaan
-  router.get("/penghargaan/:id", penghargaan.findByPk);
+  router.get("/penghargaan/:uuid", penghargaan.findOne);
 
   // Retrieve all dokumen
   router.get("/dokumen/:tipe", dokumen.findAll);

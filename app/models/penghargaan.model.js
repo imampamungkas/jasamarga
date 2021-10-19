@@ -2,15 +2,10 @@ module.exports = (sequelize, Sequelize) => {
   const Penghargaan = sequelize.define(
     "penghargaan",
     {
-      lang: {
-        type: Sequelize.STRING(2),
-        defaultValue: "id",
-      },
-      nama: {
-        type: Sequelize.STRING,
-      },
-      deskripsi: {
-        type: Sequelize.TEXT,
+      uuid: {
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
+        primaryKey: true,
       },
       tahun: {
         type: Sequelize.STRING(4),

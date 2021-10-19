@@ -4,7 +4,6 @@ const fs = require("fs");
 const db = require("../models");
 const Pejabat = db.pejabat;
 const PejabatI18n = db.pejabatI18n;
-const pejabatI18n = db.pejabatI18n;
 const Op = db.Sequelize.Op;
 
 const { body } = require("express-validator");
@@ -64,8 +63,8 @@ exports.create = async (req, res) => {
           i18n[i]["pejabatUuid"] = data.uuid;
           await PejabatI18n.create(i18n[i]);
         }
+        await data.reload({ include: 'i18n' });
       }
-      await data.reload({ include: 'i18n' });
 
       res.send(data);
     })
@@ -118,7 +117,7 @@ exports.findAll = (req, res) => {
       ? Pejabat.findAll({
         where: condition,
         include: {
-          model: pejabatI18n,
+          model: PejabatI18n,
           as: 'i18n',
           where: condition_i18n,
         },
@@ -127,7 +126,7 @@ exports.findAll = (req, res) => {
       : Pejabat.findAndCountAll({
         where: condition,
         include: {
-          model: pejabatI18n,
+          model: PejabatI18n,
           as: 'i18n',
           where: condition_i18n,
         },
@@ -165,7 +164,6 @@ exports.findOne = (req, res) => {
   Pejabat.findOne({
     where: { [Op.and]: [{ uuid: uuid }, { tipe: tipe }] },
     include: 'i18n'
-
   })
     .then((data) => {
       if (data == null) {
@@ -231,14 +229,14 @@ exports.update = async (req, res) => {
         }
         data.update(pejabat);
         if (i18n instanceof Array && i18n.length > 0) {
-          i18n.forEach(async (element) => {
-            const { lang, ...trans } = element;
+          for (var i = 0; i < i18n.length; i++) {
+            const { lang, ...trans } = i18n[i];
             await PejabatI18n.update(trans, {
               where: { [Op.and]: [{ pejabatUuid: uuid }, { lang: lang }] },
             });
-          });
+          }
+          await data.reload({ include: 'i18n' });
         }
-        await data.reload();
         res.send({
           message: "Pejabat was updated successfully.",
           data: data,

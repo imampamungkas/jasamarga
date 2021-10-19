@@ -16,21 +16,21 @@ module.exports = (app) => {
   // Retrieve all Penghargaan
   router.get("/", penghargaan.findAll);
 
-  // Retrieve a single Penghargaan with id
-  router.get("/:id", penghargaan.findOne);
+  // Retrieve a single Penghargaan with uuid
+  router.get("/:uuid", penghargaan.findOne);
 
-  // Update a Penghargaan with id
+  // Update a Penghargaan with uuid
   router.put(
-    "/:id",
+    "/:uuid",
     penghargaan.validate("updatePenghargaan"),
     penghargaan.update
   );
 
-  // Update a Penghargaan with id
+  // Update a Penghargaan with uuid
   router.put("/", penghargaan.updateBulk);
 
-  // Delete a Penghargaan with id
-  router.delete("/:id", penghargaan.delete);
+  // Delete a Penghargaan with uuid
+  router.delete("/:uuid", penghargaan.delete);
 
   // Delete all Penghargaan
   router.delete("/", penghargaan.deleteAll);

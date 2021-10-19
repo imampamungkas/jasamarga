@@ -37,7 +37,7 @@ module.exports = (app) => {
             expiresIn: "20m",
           });
           const refreshToken = jwt.sign({ user: body }, refreshTokenSecret);
-          RefreshToken.create({ token: refreshToken, userId: user.id });
+          await RefreshToken.create({ token: refreshToken, userId: user.id });
           return res.json({
             accessToken,
             refreshToken,

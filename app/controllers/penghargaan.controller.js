@@ -2,17 +2,19 @@ const paginate = require("express-paginate");
 const fs = require("fs");
 const db = require("../models");
 const Penghargaan = db.penghargaan;
+const PenghargaanI18n = db.penghargaanI18n;
 const Op = db.Sequelize.Op;
 
 const { body } = require("express-validator");
 const { validationResult } = require("express-validator");
+const { penghargaan } = require("../models");
 
 exports.validate = (method) => {
   switch (method) {
     case "createPenghargaan": {
       return [
-        body("nama").exists(),
-        body("deskripsi").exists(),
+        // body("nama").exists(),
+        // body("deskripsi").exists(),
         body("urutan").exists(),
         body("tahun").exists(),
       ];
@@ -31,10 +33,11 @@ exports.create = async (req, res) => {
     res.status(400).json({ errors: errors.array() });
     return;
   }
-  var file_name = null;
+
+  const { i18n, ...penghargaan } = req.body;
   if (req.body.hasOwnProperty("nama_file")) {
     if (req.body.nama_file) {
-      file_name = req.body.nama_file.nama;
+      var file_name = req.body.nama_file.nama;
       const b = Buffer.from(req.body.nama_file.data, "base64");
       const timestamp = `penghargaan/${new Date().getTime()}`;
       var dir = `public/uploads/${timestamp}/`;
@@ -46,23 +49,20 @@ exports.create = async (req, res) => {
           console.log("file is created", file_name);
         }
       });
-      file_name = `${timestamp}/${file_name}`;
+      penghargaan["nama_file"] = `${timestamp}/${file_name}`;
     }
   }
 
-  // Create a Penghargaan
-  const penghargaan = {
-    lang: req.body.lang || "id",
-    nama: req.body.nama,
-    tahun: req.body.tahun,
-    deskripsi: req.body.deskripsi,
-    nama_file: file_name,
-    urutan: req.body.urutan,
-  };
-
   // Save Penghargaan in the database
   Penghargaan.create(penghargaan)
-    .then((data) => {
+    .then(async (data) => {
+      if (i18n instanceof Array && i18n.length > 0) {
+        for (var i = 0; i < i18n.length; i++) {
+          i18n[i]["penghargaanUuid"] = data.uuid;
+          await PenghargaanI18n.create(i18n[i]);
+        }
+        await data.reload({ include: 'i18n' });
+      }
       res.send(data);
     })
     .catch((err) => {
@@ -75,40 +75,60 @@ exports.create = async (req, res) => {
 
 // Retrieve all Penghargaan from the database.
 exports.findAll = (req, res) => {
-  const lang = req.query.lang;
   const nopage = req.query.nopage || 0;
   const search = req.query.search;
   const status = req.query.status;
   const tahun = req.query.tahun;
+
   var condition = {
     [Op.and]: [
       search
         ? {
-            [Op.or]: [
-              { nama: { [Op.like]: `%${search}%` } },
-              { deskripsi: { [Op.like]: `%${search}%` } },
-              { nama_file: { [Op.like]: `%${search}%` } },
-            ],
-          }
+          [Op.or]: [
+            { nama_file: { [Op.like]: `%${search}%` } },
+          ],
+        }
         : null,
       status ? { status: status } : null,
       tahun ? { tahun: tahun } : null,
-      lang ? { lang: lang } : null,
+    ],
+  };
+
+  var condition_i18n = {
+    [Op.and]: [
+      search
+        ? {
+          [Op.or]: [
+            { '$i18n.nama$': { [Op.like]: `%${search}%` } },
+            { '$i18n.deskripsi$': { [Op.like]: `%${search}%` } },
+          ],
+        }
+        : null,
     ],
   };
 
   var query =
     nopage == 1
       ? Penghargaan.findAll({
-          where: condition,
-          order: [["urutan", "DESC"]],
-        })
+        where: condition,
+        include: {
+          model: PenghargaanI18n,
+          as: 'i18n',
+          where: condition_i18n,
+        },
+        order: [["urutan", "DESC"]],
+      })
       : Penghargaan.findAndCountAll({
-          where: condition,
-          limit: req.query.limit,
-          offset: req.skip,
-          order: [["urutan", "DESC"]],
-        });
+        where: condition,
+        include: {
+          model: PenghargaanI18n,
+          as: 'i18n',
+          where: condition_i18n,
+        },
+        limit: req.query.limit,
+        offset: req.skip,
+        order: [["urutan", "DESC"]],
+      });
   query
     .then((results) => {
       if (nopage == 1) {
@@ -132,15 +152,18 @@ exports.findAll = (req, res) => {
     });
 };
 
-// Find a single Penghargaan with an id
+// Find a single Penghargaan with an uuid
 exports.findOne = (req, res) => {
-  const id = req.params.id;
+  const uuid = req.params.uuid;
 
-  Penghargaan.findByPk(id)
+  Penghargaan.findOne({
+    where: { uuid: uuid },
+    include: 'i18n'
+  })
     .then((data) => {
       if (data == null) {
         res.status(404).send({
-          message: "Error retrieving Penghargaan with id=" + id,
+          message: "Error retrieving Penghargaan with uuid=" + uuid,
         });
       } else {
         res.send(data);
@@ -148,15 +171,15 @@ exports.findOne = (req, res) => {
     })
     .catch((err) => {
       res.status(500).send({
-        message: "Error retrieving Penghargaan with id=" + id,
+        message: "Error retrieving Penghargaan with uuid=" + uuid,
       });
     });
 };
 
-// Update a Penghargaan by the id in the request
+// Update a Penghargaan by the uuid in the request
 exports.update = async (req, res) => {
-  const id = req.params.id;
-  let penghargaan = req.body;
+  const uuid = req.params.uuid;
+  const { i18n, ...penghargaan } = req.body;
   if (req.body.hasOwnProperty("nama_file")) {
     if (req.body.nama_file) {
       file_name = req.body.nama_file.nama;
@@ -176,11 +199,11 @@ exports.update = async (req, res) => {
       delete penghargaan.nama_file;
     }
   }
-  Penghargaan.findByPk(id)
-    .then((data) => {
+  Penghargaan.findByPk(uuid)
+    .then(async (data) => {
       if (data == null) {
         res.status(404).send({
-          message: "Error updating Penghargaan with id=" + id,
+          message: "Error updating Penghargaan with uuid=" + uuid,
         });
       } else {
         if (data.nama_file !== null) {
@@ -194,6 +217,15 @@ exports.update = async (req, res) => {
           });
         }
         data.update(penghargaan);
+        if (i18n instanceof Array && i18n.length > 0) {
+          for (var i = 0; i < i18n.length; i++) {
+            const { lang, ...trans } = i18n[i];
+            await PenghargaanI18n.update(trans, {
+              where: { [Op.and]: [{ penghargaanUuid: uuid }, { lang: lang }] },
+            });
+          }
+          await data.reload({ include: 'i18n' });
+        }
         res.send({
           message: "Penghargaan was updated successfully.",
           data: data,
@@ -203,27 +235,28 @@ exports.update = async (req, res) => {
     .catch((err) => {
       console.log("err", err);
       res.status(500).send({
-        message: "Error updating Penghargaan with id=" + id,
+        message: "Error updating Penghargaan with uuid=" + uuid,
       });
     });
 };
 
-// Update a Penghargaan by the id in the request
+// Update a Penghargaan by the uuid in the request
 exports.updateBulk = async (req, res) => {
   const data = req.body.data;
   let messages = [];
   if (data instanceof Array && data.length > 0) {
     for (var i = 0; i < data.length; i++) {
-      const id = data[i].id;
-      delete data[i].id;
-      var result = await Penghargaan.update(data[i], {
-        where: { id: id },
+      const { uuid, ...penghargaan } = data[i];
+      console.log("uuid ", uuid);
+      console.log("penghargaan", penghargaan);
+      var result = await Penghargaan.update(penghargaan, {
+        where: { uuid: uuid },
       });
       if (result[0] > 0) {
-        messages.push(`Penghargaan with id ${id} was updated successfully.`);
+        messages.push(`Penghargaan with uuid ${uuid} was updated successfully.`);
       } else {
         messages.push(
-          `Cannot update Penghargaan with id=${id}. Maybe Penghargaan was not found or req.body is empty!`
+          `Cannot update Penghargaan with uuid=${uuid}. Maybe Penghargaan was not found or req.body is empty!`
         );
       }
     }
@@ -237,15 +270,15 @@ exports.updateBulk = async (req, res) => {
   }
 };
 
-// Delete a Penghargaan with the specified id in the request
+// Delete a Penghargaan with the specified uuid in the request
 exports.delete = (req, res) => {
-  const id = req.params.id;
+  const uuid = req.params.uuid;
 
-  Penghargaan.findByPk(id)
+  Penghargaan.findByPk(uuid)
     .then((data) => {
       if (data == null) {
         res.status(404).send({
-          message: "Error deleting Penghargaan with id=" + id,
+          message: "Error deleting Penghargaan with uuid=" + uuid,
         });
       } else {
         if (data.nama_file !== null) {
@@ -267,7 +300,7 @@ exports.delete = (req, res) => {
     .catch((err) => {
       console.log("err", err);
       res.status(500).send({
-        message: "Error deleting Penghargaan with id=" + id,
+        message: "Error deleting Penghargaan with uuid=" + uuid,
       });
     });
 };
