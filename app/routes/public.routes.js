@@ -17,7 +17,7 @@ module.exports = (app) => {
   // Retrieve all pejabat
   router.get("/pejabat/:tipe", pejabat.findAll);
   // Retrieve pejabat
-  router.get("/pejabat/:tipe/:id", pejabat.findOne);
+  router.get("/pejabat/:tipe/:uuid", pejabat.findOne);
 
   // Retrieve all penghargaan
   router.get("/penghargaan", penghargaan.findAll);

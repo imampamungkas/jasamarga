@@ -1,21 +1,23 @@
+//@ts-check
 const paginate = require("express-paginate");
 const fs = require("fs");
 const db = require("../models");
 const Pejabat = db.pejabat;
+const PejabatI18n = db.pejabatI18n;
+const pejabatI18n = db.pejabatI18n;
 const Op = db.Sequelize.Op;
 
 const { body } = require("express-validator");
 const { validationResult } = require("express-validator");
-const { timeStamp } = require("console");
 
 exports.validate = (method) => {
   switch (method) {
     case "createPejabat": {
       return [
-        body("nama").exists(),
-        body("deskripsi").exists(),
+        // body("nama").exists(),
+        // body("deskripsi").exists(),
         body("urutan").exists(),
-        body("jabatan").exists(),
+        // body("jabatan").exists(),
       ];
     }
     case "updatePejabat": {
@@ -33,10 +35,13 @@ exports.create = async (req, res) => {
     res.status(400).json({ errors: errors.array() });
     return;
   }
-  var file_name = null;
+
+  const { i18n, ...pejabat } = req.body;
+  pejabat["tipe"] = tipe;
+  // console.log('pejabat',pejabat);
   if (req.body.hasOwnProperty("nama_file")) {
     if (req.body.nama_file) {
-      file_name = req.body.nama_file.nama;
+      var file_name = req.body.nama_file.nama;
       const b = Buffer.from(req.body.nama_file.data, "base64");
       const timestamp = `pejabat-${tipe}/${new Date().getTime()}`;
       var dir = `public/uploads/${timestamp}/`;
@@ -48,24 +53,20 @@ exports.create = async (req, res) => {
           console.log("file is created", file_name);
         }
       });
-      file_name = `${timestamp}/${file_name}`;
+      pejabat["nama_file"] = `${timestamp}/${file_name}`;
     }
   }
-
-  // Create a Pejabat
-  const pejabat = {
-    lang: req.body.lang || "id",
-    nama: req.body.nama,
-    deskripsi: req.body.deskripsi,
-    jabatan: req.body.jabatan,
-    tipe: tipe,
-    nama_file: file_name,
-    urutan: req.body.urutan,
-  };
-
   // Save Pejabat in the database
   Pejabat.create(pejabat)
-    .then((data) => {
+    .then(async (data) => {
+      if (i18n instanceof Array && i18n.length > 0) {
+        for (var i = 0; i < i18n.length; i++) {
+          i18n[i]["pejabatUuid"] = data.uuid;
+          await PejabatI18n.create(i18n[i]);
+        }
+      }
+      await data.reload({ include: 'i18n' });
+
       res.send(data);
     })
     .catch((err) => {
@@ -79,40 +80,61 @@ exports.create = async (req, res) => {
 // Retrieve all Pejabat from the database.
 exports.findAll = (req, res) => {
   const tipe = req.params.tipe;
-  const lang = req.query.lang;
   const nopage = req.query.nopage || 0;
   const search = req.query.search;
   const status = req.query.status;
+
   var condition = {
     [Op.and]: [
       search
         ? {
-            [Op.or]: [
-              { nama: { [Op.like]: `%${search}%` } },
-              { deskripsi: { [Op.like]: `%${search}%` } },
-              { nama_file: { [Op.like]: `%${search}%` } },
-              { jabatan: { [Op.like]: `%${search}%` } },
-            ],
-          }
+          [Op.or]: [
+            { nama_file: { [Op.like]: `%${search}%` } },
+          ],
+        }
         : null,
       status ? { status: status } : null,
-      lang ? { lang: lang } : null,
       { tipe: tipe },
     ],
   };
 
+  var condition_i18n = {
+    [Op.and]: [
+      search
+        ? {
+          [Op.or]: [
+            { '$i18n.nama$': { [Op.like]: `%${search}%` } },
+            { '$i18n.deskripsi$': { [Op.like]: `%${search}%` } },
+            { '$i18n.jabatan$': { [Op.like]: `%${search}%` } },
+          ],
+        }
+        : null,
+    ],
+  };
+
+
   var query =
     nopage == 1
       ? Pejabat.findAll({
-          where: condition,
-          order: [["urutan", "DESC"]],
-        })
+        where: condition,
+        include: {
+          model: pejabatI18n,
+          as: 'i18n',
+          where: condition_i18n,
+        },
+        order: [["urutan", "DESC"]],
+      })
       : Pejabat.findAndCountAll({
-          where: condition,
-          limit: req.query.limit,
-          offset: req.skip,
-          order: [["urutan", "DESC"]],
-        });
+        where: condition,
+        include: {
+          model: pejabatI18n,
+          as: 'i18n',
+          where: condition_i18n,
+        },
+        limit: req.query.limit,
+        offset: req.skip,
+        order: [["urutan", "DESC"]],
+      });
   query
     .then((results) => {
       if (nopage == 1) {
@@ -135,18 +157,20 @@ exports.findAll = (req, res) => {
     });
 };
 
-// Find a single Pejabat with an id
+// Find a single Pejabat with an uuid
 exports.findOne = (req, res) => {
   const tipe = req.params.tipe;
-  const id = req.params.id;
+  const uuid = req.params.uuid;
 
   Pejabat.findOne({
-    where: { [Op.and]: [{ id: id }, { tipe: tipe }] },
+    where: { [Op.and]: [{ uuid: uuid }, { tipe: tipe }] },
+    include: 'i18n'
+
   })
     .then((data) => {
       if (data == null) {
         res.status(404).send({
-          message: "Error retrieving Pejabat with id=" + id,
+          message: "Error retrieving Pejabat with uuid=" + uuid,
         });
       } else {
         res.send(data);
@@ -154,20 +178,21 @@ exports.findOne = (req, res) => {
     })
     .catch((err) => {
       res.status(500).send({
-        message: "Error retrieving Pejabat with id=" + id,
+        message: "Error retrieving Pejabat with uuid=" + uuid,
       });
     });
 };
 
-// Update a Pejabat by the id in the request
+// Update a Pejabat by the uuid in the request
 exports.update = async (req, res) => {
   const tipe = req.params.tipe;
-  const id = req.params.id;
-  let pejabat = req.body;
+  const uuid = req.params.uuid;
+
+  const { i18n, ...pejabat } = req.body;
   pejabat["tipe"] = tipe;
   if (req.body.hasOwnProperty("nama_file")) {
     if (req.body.nama_file) {
-      file_name = req.body.nama_file.nama;
+      var file_name = req.body.nama_file.nama;
       const b = Buffer.from(req.body.nama_file.data, "base64");
       const timestamp = `pejabat-${tipe}/${new Date().getTime()}`;
       var dir = `public/uploads/${timestamp}/`;
@@ -185,18 +210,19 @@ exports.update = async (req, res) => {
     }
   }
   Pejabat.findOne({
-    where: { [Op.and]: [{ id: id }, { tipe: tipe }] },
+    where: { [Op.and]: [{ uuid: uuid }, { tipe: tipe }] },
+    include: 'i18n'
   })
-    .then((data) => {
+    .then(async (data) => {
       if (data == null) {
         res.status(404).send({
-          message: "Error updating Pejabat with id=" + id,
+          message: "Error updating Pejabat with uuid=" + uuid,
         });
       } else {
         if (data.nama_file !== null) {
           var dir = data.nama_file.split("/");
           console.log("dir", dir);
-          path = `public/uploads/${dir[0]}/${dir[1]}`;
+          var path = `public/uploads/${dir[0]}/${dir[1]}`;
           fs.rm(path, { recursive: true }, (err) => {
             if (err) {
               console.log("err : ", err);
@@ -204,6 +230,15 @@ exports.update = async (req, res) => {
           });
         }
         data.update(pejabat);
+        if (i18n instanceof Array && i18n.length > 0) {
+          i18n.forEach(async (element) => {
+            const { lang, ...trans } = element;
+            await PejabatI18n.update(trans, {
+              where: { [Op.and]: [{ pejabatUuid: uuid }, { lang: lang }] },
+            });
+          });
+        }
+        await data.reload();
         res.send({
           message: "Pejabat was updated successfully.",
           data: data,
@@ -213,31 +248,31 @@ exports.update = async (req, res) => {
     .catch((err) => {
       console.log("err", err);
       res.status(500).send({
-        message: "Error updating Pejabat with id=" + id,
+        message: "Error updating Pejabat with uuid=" + uuid,
       });
     });
 };
 
-// Update a Pejabat by the id in the request
+// Update a Pejabat by the uuid in the request
 exports.updateBulk = async (req, res) => {
   const tipe = req.params.tipe;
   const data = req.body.data;
   let messages = [];
   if (data instanceof Array && data.length > 0) {
     for (var i = 0; i < data.length; i++) {
-      const id = data[i].id;
-      delete data[i].id;
+      const uuid = data[i].uuid;
+      delete data[i].uuid;
       data[i].tipe = tipe;
       var result = await Pejabat.update(data[i], {
-        where: { [Op.and]: [{ id: id }, { tipe: tipe }] },
+        where: { [Op.and]: [{ uuid: uuid }, { tipe: tipe }] },
       });
       if (result[0] > 0) {
         messages.push(
-          `Pejabat with id ${id} ${tipe} was updated successfully.`
+          `Pejabat with uuid ${uuid} ${tipe} was updated successfully.`
         );
       } else {
         messages.push(
-          `Cannot update Pejabat with id=${id} ${tipe}. Maybe Pejabat was not found or req.body is empty!`
+          `Cannot update Pejabat with uuid=${uuid} ${tipe}. Maybe Pejabat was not found or req.body is empty!`
         );
       }
     }
@@ -251,23 +286,24 @@ exports.updateBulk = async (req, res) => {
   }
 };
 
-// Delete a Pejabat with the specified id in the request
+
+// Delete a Pejabat with the specified uuid in the request
 exports.delete = (req, res) => {
   const tipe = req.params.tipe;
-  const id = req.params.id;
+  const uuid = req.params.uuid;
 
   Pejabat.findOne({
-    where: { [Op.and]: [{ id: id }, { tipe: tipe }] },
+    where: { [Op.and]: [{ uuid: uuid }, { tipe: tipe }] },
   })
     .then((data) => {
       if (data == null) {
         res.status(404).send({
-          message: "Error deleting Pejabat with id=" + id,
+          message: "Error deleting Pejabat with uuid=" + uuid,
         });
       } else {
         if (data.nama_file !== null) {
           var dir = data.nama_file.split("/");
-          path = `public/uploads/${dir[0]}/${dir[1]}`;
+          var path = `public/uploads/${dir[0]}/${dir[1]}`;
           fs.rm(path, { recursive: true }, (err) => {
             if (err) {
               console.log("err : ", err);
@@ -284,7 +320,7 @@ exports.delete = (req, res) => {
     .catch((err) => {
       console.log("err", err);
       res.status(500).send({
-        message: "Error deleting Pejabat with id=" + id,
+        message: "Error deleting Pejabat with uuid=" + uuid,
       });
     });
 };
@@ -297,7 +333,7 @@ exports.deleteAll = (req, res) => {
     truncate: false,
   })
     .then((nums) => {
-      path = `public/uploads/pejabat-${tipe}`;
+      var path = `public/uploads/pejabat-${tipe}`;
       fs.rm(path, { recursive: true }, (err) => {
         if (err) {
           console.log("err : ", err);

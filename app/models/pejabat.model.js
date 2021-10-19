@@ -2,18 +2,10 @@ module.exports = (sequelize, Sequelize) => {
   const Pejabat = sequelize.define(
     "pejabat",
     {
-      lang: {
-        type: Sequelize.STRING(2),
-        defaultValue: "id",
-      },
-      nama: {
-        type: Sequelize.STRING,
-      },
-      deskripsi: {
-        type: Sequelize.TEXT,
-      },
-      jabatan: {
-        type: Sequelize.TEXT,
+      uuid: {
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
+        primaryKey: true,
       },
       tipe: {
         type: Sequelize.ENUM(

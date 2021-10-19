@@ -12,17 +12,17 @@ module.exports = (app) => {
   // Retrieve all Pejabat
   router.get("/:tipe", pejabat.findAll);
 
-  // Retrieve a single Pejabat with id
-  router.get("/:tipe/:id", pejabat.findOne);
+  // Retrieve a single Pejabat with uuid
+  router.get("/:tipe/:uuid", pejabat.findOne);
 
-  // Update a Pejabat with id
-  router.put("/:tipe/:id", pejabat.validate("updatePejabat"), pejabat.update);
+  // Update a Pejabat with uuid
+  router.put("/:tipe/:uuid", pejabat.validate("updatePejabat"), pejabat.update);
 
-  // Update a Pejabat with id
+  // Update a Pejabat with uuid
   router.put("/:tipe", pejabat.updateBulk);
 
-  // Delete a Pejabat with id
-  router.delete("/:tipe/:id", pejabat.delete);
+  // Delete a Pejabat with uuid
+  router.delete("/:tipe/:uuid", pejabat.delete);
 
   // Delete all Pejabat
   router.delete("/:tipe", pejabat.deleteAll);

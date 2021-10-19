@@ -21,6 +21,7 @@ db.sequelize = sequelize;
 db.users = require("./user.model.js")(sequelize, Sequelize);
 db.infografis = require("./infografis.model.js")(sequelize, Sequelize);
 db.pejabat = require("./pejabat.model.js")(sequelize, Sequelize);
+db.pejabatI18n = require("./pejabat-i18n.model.js")(sequelize, Sequelize);
 db.penghargaan = require("./penghargaan.model.js")(sequelize, Sequelize);
 db.dokumen = require("./dokumen.model.js")(sequelize, Sequelize);
 db.asean = require("./asean.model.js")(sequelize, Sequelize);
@@ -45,5 +46,14 @@ db.artikel.hasMany(db.gambar, {
 db.gambar.belongsTo(db.artikel, {
   foreignKey: "artikelUuid",
   as: "artikel",
+});
+
+db.pejabat.hasMany(db.pejabatI18n, {
+  as: "i18n",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+db.pejabatI18n.belongsTo(db.pejabat, {
+  as: "pejabat",
 });
 module.exports = db;

@@ -120,3 +120,4 @@ dist
 # vscode 
 .vscode
 *.sql
+.DS_Store
