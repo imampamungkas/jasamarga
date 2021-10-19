@@ -1,44 +1,64 @@
 const paginate = require("express-paginate");
 const db = require("../../models");
 const Kantor = db.kantor;
+const KantorI18n = db.kantorI18n;
 const Op = db.Sequelize.Op;
 
 exports.findAll = (req, res) => {
-  const lang = req.query.lang || "id";
+  const lang = req.query.lang || "uuid";
   const nopage = req.query.nopage || 0;
   const search = req.query.search;
   const tipe = req.query.tipe;
-
   var condition = {
     [Op.and]: [
       search
         ? {
-            [Op.or]: [
-              { kantor: { [Op.like]: `%${search}%` } },
-              { alamat: { [Op.like]: `%${search}%` } },
-              { telepon: { [Op.like]: `%${search}%` } },
-              { fax: { [Op.like]: `%${search}%` } },
-              { email: { [Op.like]: `%${search}%` } },
-            ],
-          }
+          [Op.or]: [
+            { telepon: { [Op.like]: `%${search}%` } },
+            { fax: { [Op.like]: `%${search}%` } },
+            { email: { [Op.like]: `%${search}%` } },
+          ],
+        }
         : null,
-      { status: "publish" },
-      { lang: lang },
       tipe ? { tipe: tipe } : null,
+    ],
+  };
+
+  var condition_i18n = {
+    [Op.and]: [
+      search
+        ? {
+          [Op.or]: [
+            { '$i18n.nama_kantor$': { [Op.like]: `%${search}%` } },
+            { '$i18n.alamat$': { [Op.like]: `%${search}%` } },
+          ],
+        }
+        : null,
+      { '$i18n.lang$': lang },
     ],
   };
   var query =
     nopage == 1
       ? Kantor.findAll({
-          where: condition,
-          order: [["urutan", "DESC"]],
-        })
+        where: condition,
+        include: {
+          model: KantorI18n,
+          as: 'i18n',
+          where: condition_i18n,
+        },
+        order: [["urutan", "DESC"]],
+      })
       : Kantor.findAndCountAll({
-          where: condition,
-          limit: req.query.limit,
-          offset: req.skip,
-          order: [["urutan", "DESC"]],
-        });
+        where: condition,
+        include: {
+          model: KantorI18n,
+          as: 'i18n',
+          where: condition_i18n,
+        },
+        limit: req.query.limit,
+        offset: req.skip,
+        order: [["urutan", "DESC"]],
+      });
   query
     .then((results) => {
       if (nopage == 1) {
@@ -61,15 +81,25 @@ exports.findAll = (req, res) => {
     });
 };
 
-// Find a single Kantor with an id
+// Find a single Kantor with an uuid
 exports.findByPk = (req, res) => {
-  const id = req.params.id;
+  const uuid = req.params.uuid;
+  const lang = req.query.lang || "id";
 
-  Kantor.findOne({ where: { id: id } })
+  Kantor.findOne({
+    where: {
+      [Op.and]: [{ uuid: uuid }]
+    },
+    include: {
+      model: KantorI18n,
+      as: 'i18n',
+      where: { '$i18n.lang$': lang },
+    },
+  })
     .then((data) => {
       if (data == null) {
         res.status(404).send({
-          message: "Error retrieving Kantor with id=" + id,
+          message: "Error retrieving Kantor with uuid=" + uuid,
         });
       } else {
         res.send(data);
@@ -77,7 +107,7 @@ exports.findByPk = (req, res) => {
     })
     .catch((err) => {
       res.status(500).send({
-        message: "Error retrieving Kantor with id=" + id,
+        message: "Error retrieving Kantor with uuid=" + uuid,
       });
     });
 };

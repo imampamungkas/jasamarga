@@ -1,7 +1,7 @@
 const paginate = require("express-paginate");
-const fs = require("fs");
 const db = require("../models");
 const Kantor = db.kantor;
+const KantorI18n = db.kantorI18n;
 const Op = db.Sequelize.Op;
 
 const { body } = require("express-validator");
@@ -13,8 +13,8 @@ exports.validate = (method) => {
     case "createKantor": {
       return [
         body("tipe").exists(),
-        body("kantor").exists(),
-        body("alamat").exists(),
+        // body("nama_kantor").exists(),
+        // body("alamat").exists(),
         body("telepon").exists(),
         body("fax").exists(),
         body("email").exists().isEmail(),
@@ -35,20 +35,18 @@ exports.create = async (req, res) => {
     return;
   }
 
-  // Create a Kantor
-  const kantor = {
-    lang: req.body.lang || "id",
-    tipe: req.body.tipe,
-    kantor: req.body.kantor,
-    alamat: req.body.alamat,
-    telepon: req.body.telepon,
-    fax: req.body.fax,
-    email: req.body.email,
-  };
+  const { i18n, ...kantor } = req.body;
 
   // Save Kantor in the database
   Kantor.create(kantor)
-    .then((data) => {
+    .then(async (data) => {
+      if (i18n instanceof Array && i18n.length > 0) {
+        for (var i = 0; i < i18n.length; i++) {
+          i18n[i]["kantorUuid"] = data.uuid;
+          await KantorI18n.create(i18n[i]);
+        }
+        await data.reload({ include: 'i18n' });
+      }
       res.send(data);
     })
     .catch((err) => {
@@ -61,42 +59,60 @@ exports.create = async (req, res) => {
 
 // Retrieve all Kantor from the database.
 exports.findAll = (req, res) => {
-  const lang = req.query.lang;
   const nopage = req.query.nopage || 0;
   const search = req.query.search;
-  const status = req.query.status;
   const tipe = req.query.tipe;
+
   var condition = {
     [Op.and]: [
       search
         ? {
-            [Op.or]: [
-              { kantor: { [Op.like]: `%${search}%` } },
-              { alamat: { [Op.like]: `%${search}%` } },
-              { telepon: { [Op.like]: `%${search}%` } },
-              { fax: { [Op.like]: `%${search}%` } },
-              { email: { [Op.like]: `%${search}%` } },
-            ],
-          }
+          [Op.or]: [
+            { telepon: { [Op.like]: `%${search}%` } },
+            { fax: { [Op.like]: `%${search}%` } },
+            { email: { [Op.like]: `%${search}%` } },
+          ],
+        }
         : null,
       tipe ? { tipe: tipe } : null,
-      status ? { status: status } : null,
-      lang ? { lang: lang } : null,
+    ],
+  };
+
+  var condition_i18n = {
+    [Op.and]: [
+      search
+        ? {
+          [Op.or]: [
+            { '$i18n.nama_kantor$': { [Op.like]: `%${search}%` } },
+            { '$i18n.alamat$': { [Op.like]: `%${search}%` } },
+          ],
+        }
+        : null,
     ],
   };
 
   var query =
     nopage == 1
       ? Kantor.findAll({
-          where: condition,
-          order: [["urutan", "DESC"]],
-        })
+        where: condition,
+        include: {
+          model: KantorI18n,
+          as: 'i18n',
+          where: condition_i18n,
+        },
+        order: [["urutan", "DESC"]],
+      })
       : Kantor.findAndCountAll({
-          where: condition,
-          limit: req.query.limit,
-          offset: req.skip,
-          order: [["urutan", "DESC"]],
-        });
+        where: condition,
+        include: {
+          model: KantorI18n,
+          as: 'i18n',
+          where: condition_i18n,
+        },
+        limit: req.query.limit,
+        offset: req.skip,
+        order: [["urutan", "DESC"]],
+      });
   query
     .then((results) => {
       if (nopage == 1) {
@@ -119,15 +135,18 @@ exports.findAll = (req, res) => {
     });
 };
 
-// Find a single Kantor with an id
+// Find a single Kantor with an uuid
 exports.findOne = (req, res) => {
-  const id = req.params.id;
+  const uuid = req.params.uuid;
 
-  Kantor.findByPk(id)
+  Kantor.findOne({
+    where: { uuid: uuid },
+    include: 'i18n'
+  })
     .then((data) => {
       if (data == null) {
         res.status(404).send({
-          message: "Error retrieving Kantor with id=" + id,
+          message: "Error retrieving Kantor with uuid=" + uuid,
         });
       } else {
         res.send(data);
@@ -135,23 +154,32 @@ exports.findOne = (req, res) => {
     })
     .catch((err) => {
       res.status(500).send({
-        message: "Error retrieving Kantor with id=" + id,
+        message: "Error retrieving Kantor with uuid=" + uuid,
       });
     });
 };
 
-// Update a Kantor by the id in the request
+// Update a Kantor by the uuid in the request
 exports.update = async (req, res) => {
-  const id = req.params.id;
-  let kantor = req.body;
-  Kantor.findByPk(id)
-    .then((data) => {
+  const uuid = req.params.uuid;
+  const { i18n, ...kantor } = req.body;
+  Kantor.findByPk(uuid)
+    .then(async (data) => {
       if (data == null) {
         res.status(404).send({
-          message: "Error updating Kantor with id=" + id,
+          message: "Error updating Kantor with uuid=" + uuid,
         });
       } else {
         data.update(kantor);
+        if (i18n instanceof Array && i18n.length > 0) {
+          for (var i = 0; i < i18n.length; i++) {
+            const { lang, ...trans } = i18n[i];
+            await KantorI18n.update(trans, {
+              where: { [Op.and]: [{ kantorUuid: uuid }, { lang: lang }] },
+            });
+          }
+          await data.reload({ include: 'i18n' });
+        }
         res.send({
           message: "Kantor was updated successfully.",
           data: data,
@@ -161,27 +189,27 @@ exports.update = async (req, res) => {
     .catch((err) => {
       console.log("err", err);
       res.status(500).send({
-        message: "Error updating Kantor with id=" + id,
+        message: "Error updating Kantor with uuid=" + uuid,
       });
     });
 };
 
-// Update a Kantor by the id in the request
+// Update a Kantor by the uuid in the request
 exports.updateBulk = async (req, res) => {
   const data = req.body.data;
   let messages = [];
   if (data instanceof Array && data.length > 0) {
     for (var i = 0; i < data.length; i++) {
-      const id = data[i].id;
-      delete data[i].id;
+      const uuid = data[i].uuid;
+      delete data[i].uuid;
       var result = await Kantor.update(data[i], {
-        where: { id: id },
+        where: { uuid: uuid },
       });
       if (result[0] > 0) {
-        messages.push(`Kantor with id ${id} was updated successfully.`);
+        messages.push(`Kantor with uuid ${uuid} was updated successfully.`);
       } else {
         messages.push(
-          `Cannot update Kantor with id=${id}. Maybe Kantor was not found or req.body is empty!`
+          `Cannot update Kantor with uuid=${uuid}. Maybe Kantor was not found or req.body is empty!`
         );
       }
     }
@@ -195,15 +223,15 @@ exports.updateBulk = async (req, res) => {
   }
 };
 
-// Delete a Kantor with the specified id in the request
+// Delete a Kantor with the specified uuid in the request
 exports.delete = (req, res) => {
-  const id = req.params.id;
+  const uuid = req.params.uuid;
 
-  Kantor.findByPk(id)
+  Kantor.findByPk(uuid)
     .then((data) => {
       if (data == null) {
         res.status(404).send({
-          message: "Error deleting Kantor with id=" + id,
+          message: "Error deleting Kantor with uuid=" + uuid,
         });
       } else {
         data.destroy();
@@ -216,7 +244,7 @@ exports.delete = (req, res) => {
     .catch((err) => {
       console.log("err", err);
       res.status(500).send({
-        message: "Error deleting Kantor with id=" + id,
+        message: "Error deleting Kantor with uuid=" + uuid,
       });
     });
 };

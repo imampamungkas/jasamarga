@@ -1,6 +1,6 @@
 const paginate = require("express-paginate");
 const db = require("../../models");
-const pejabatI18n = db.pejabatI18n;
+const PejabatI18n = db.pejabatI18n;
 const Pejabat = db.pejabat;
 const Op = db.Sequelize.Op;
 
@@ -94,7 +94,7 @@ exports.findOne = (req, res) => {
       [Op.and]: [{ uuid: uuid }, { tipe: tipe }]
     },
     include: {
-      model: pejabatI18n,
+      model: PejabatI18n,
       as: 'i18n',
       where: { '$i18n.lang$': lang },
     },

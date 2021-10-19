@@ -37,7 +37,7 @@ module.exports = (app) => {
   // Retrieve all kantor
   router.get("/kantor", kantor.findAll);
   // Retrieve kantor
-  router.get("/kantor/:id", kantor.findByPk);
+  router.get("/kantor/:uuid", kantor.findByPk);
 
   // Retrieve all artikel
   router.get("/artikel/:tipe", artikel.findAll);
