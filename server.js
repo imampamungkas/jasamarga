@@ -1,3 +1,4 @@
+//@ts-check
 require("dotenv").config();
 const express = require("express");
 const paginate = require("express-paginate");
@@ -60,6 +61,7 @@ require("./app/routes/dokumen.routes")(app);
 require("./app/routes/artikel.routes")(app);
 require("./app/routes/asean.routes")(app);
 require("./app/routes/kantor.routes")(app);
+require("./app/routes/kontak.routes")(app);
 var upload = require("./upload.js");
 app.post("/upload", upload);
 

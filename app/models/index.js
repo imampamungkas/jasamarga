@@ -30,6 +30,7 @@ db.asean = require("./asean.model.js")(sequelize, Sequelize);
 db.aseanI18n = require("./asean-i18n.model.js")(sequelize, Sequelize);
 db.kantor = require("./kantor.model.js")(sequelize, Sequelize);
 db.kantorI18n = require("./kantor-i18n.model.js")(sequelize, Sequelize);
+db.kontak = require("./kontak.model.js")(sequelize, Sequelize);
 db.artikel = require("./artikel.model.js")(sequelize, Sequelize);
 db.gambar = require("./gambar.model.js")(sequelize, Sequelize);
 db.tokens = require("./token.model.js")(sequelize, Sequelize);

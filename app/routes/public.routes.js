@@ -1,6 +1,5 @@
 //@ts-check
 module.exports = (app) => {
-  const passport = require("passport");
   const baner = require("../controllers/public/baner.controller.js");
   const pejabat = require("../controllers/public/pejabat.controller.js");
   const penghargaan = require("../controllers/public/penghargaan.controller.js");
@@ -8,6 +7,7 @@ module.exports = (app) => {
   const asean = require("../controllers/public/asean.controller.js");
   const kantor = require("../controllers/public/kantor.controller.js");
   const artikel = require("../controllers/public/artikel.controller.js");
+  const kontak = require("../controllers/public/kontak.controller.js");
   var router = require("express").Router();
 
   // Retrieve all baner
@@ -44,6 +44,9 @@ module.exports = (app) => {
   router.get("/artikel/:tipe", artikel.findAll);
   // Retrieve artikel
   router.get("/artikel/:tipe/:slug", artikel.findBySlug);
+
+  // Create a new kontak
+  router.post("/kontak", kontak.validate("createKontak"), kontak.create);
 
   app.use("/api/public", router);
 };

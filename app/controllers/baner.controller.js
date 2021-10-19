@@ -315,7 +315,7 @@ exports.delete = (req, res) => {
 exports.deleteAll = (req, res) => {
   const tipe = req.params.tipe;
   Baner.destroy({
-    where: {},
+    where: { tipe: tipe },
     truncate: false,
   })
     .then((nums) => {
