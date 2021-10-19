@@ -6,7 +6,6 @@ const Op = db.Sequelize.Op;
 
 const { body } = require("express-validator");
 const { validationResult } = require("express-validator");
-const { timeStamp } = require("console");
 
 exports.validate = (method) => {
   switch (method) {

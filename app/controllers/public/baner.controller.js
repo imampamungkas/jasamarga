@@ -1,8 +1,8 @@
 //@ts-check
 const paginate = require("express-paginate");
 const db = require("../../models");
-const PejabatI18n = db.pejabatI18n;
-const Pejabat = db.pejabat;
+const Baner = db.baner;
+const BanerI18n = db.banerI18n;
 const Op = db.Sequelize.Op;
 
 exports.findAll = (req, res) => {
@@ -32,29 +32,27 @@ exports.findAll = (req, res) => {
           [Op.or]: [
             { '$i18n.nama$': { [Op.like]: `%${search}%` } },
             { '$i18n.deskripsi$': { [Op.like]: `%${search}%` } },
-            { '$i18n.jabatan$': { [Op.like]: `%${search}%` } },
           ],
         }
         : null,
       { '$i18n.lang$': lang },
     ],
   };
-
   var query =
     nopage == 1
-      ? Pejabat.findAll({
+      ? Baner.findAll({
         where: condition,
         include: {
-          model: PejabatI18n,
+          model: BanerI18n,
           as: 'i18n',
           where: condition_i18n,
         },
         order: [["urutan", "DESC"]],
       })
-      : Pejabat.findAndCountAll({
+      : Baner.findAndCountAll({
         where: condition,
         include: {
-          model: PejabatI18n,
+          model: BanerI18n,
           as: 'i18n',
           where: condition_i18n,
         },
@@ -84,18 +82,18 @@ exports.findAll = (req, res) => {
     });
 };
 
-// Find a single Pejabat with an uuid
+// Find a single Baner with an id
 exports.findOne = (req, res) => {
   const uuid = req.params.uuid;
   const tipe = req.params.tipe;
   const lang = req.query.lang || "id";
 
-  Pejabat.findOne({
+  Baner.findOne({
     where: {
       [Op.and]: [{ uuid: uuid }, { tipe: tipe }]
     },
     include: {
-      model: PejabatI18n,
+      model: BanerI18n,
       as: 'i18n',
       where: { '$i18n.lang$': lang },
     },

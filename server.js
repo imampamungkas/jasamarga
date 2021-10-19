@@ -53,7 +53,7 @@ require("./app/routes/public.routes")(app);
 require("./app/routes/auth.routes")(app);
 require("./app/routes/profile.routes")(app);
 require("./app/routes/user.routes")(app);
-require("./app/routes/infografis.routes")(app);
+require("./app/routes/baner.routes")(app);
 require("./app/routes/pejabat.routes")(app);
 require("./app/routes/penghargaan.routes")(app);
 require("./app/routes/dokumen.routes")(app);

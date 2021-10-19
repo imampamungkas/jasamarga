@@ -1,6 +1,7 @@
+//@ts-check
 module.exports = (app) => {
   const passport = require("passport");
-  const infografis = require("../controllers/public/infografis.controller.js");
+  const baner = require("../controllers/public/baner.controller.js");
   const pejabat = require("../controllers/public/pejabat.controller.js");
   const penghargaan = require("../controllers/public/penghargaan.controller.js");
   const dokumen = require("../controllers/public/dokumen.controller.js");
@@ -9,10 +10,10 @@ module.exports = (app) => {
   const artikel = require("../controllers/public/artikel.controller.js");
   var router = require("express").Router();
 
-  // Retrieve all infografis
-  router.get("/infografis/:tipe", infografis.findAll);
-  // Retrieve infografis
-  router.get("/infografis/:tipe/:id", infografis.findOne);
+  // Retrieve all baner
+  router.get("/baner/:tipe", baner.findAll);
+  // Retrieve baner
+  router.get("/baner/:tipe/:uuid", baner.findOne);
 
   // Retrieve all pejabat
   router.get("/pejabat/:tipe", pejabat.findAll);

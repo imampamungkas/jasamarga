@@ -19,7 +19,8 @@ db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
 db.users = require("./user.model.js")(sequelize, Sequelize);
-db.infografis = require("./infografis.model.js")(sequelize, Sequelize);
+db.baner = require("./baner.model.js")(sequelize, Sequelize);
+db.banerI18n = require("./baner-i18n.model.js")(sequelize, Sequelize);
 db.pejabat = require("./pejabat.model.js")(sequelize, Sequelize);
 db.pejabatI18n = require("./pejabat-i18n.model.js")(sequelize, Sequelize);
 db.penghargaan = require("./penghargaan.model.js")(sequelize, Sequelize);
@@ -86,6 +87,15 @@ db.kantor.hasMany(db.kantorI18n, {
 });
 db.kantorI18n.belongsTo(db.kantor, {
   as: "kantor",
+});
+
+db.baner.hasMany(db.banerI18n, {
+  as: "i18n",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+db.banerI18n.belongsTo(db.baner, {
+  as: "baner",
 });
 
 module.exports = db;

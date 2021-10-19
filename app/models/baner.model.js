@@ -1,20 +1,15 @@
 module.exports = (sequelize, Sequelize) => {
-  const Infografis = sequelize.define(
-    "infografis",
+  const Baner = sequelize.define(
+    "baner",
     {
-      lang: {
-        type: Sequelize.STRING(2),
-        defaultValue: "id",
+      uuid: {
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
+        primaryKey: true,
       },
       tipe: {
         type: Sequelize.STRING,
         defaultValue: "beranda",
-      },
-      nama: {
-        type: Sequelize.STRING,
-      },
-      deskripsi: {
-        type: Sequelize.TEXT,
       },
       url: {
         type: Sequelize.STRING,
@@ -50,14 +45,14 @@ module.exports = (sequelize, Sequelize) => {
       },
     },
     {
-      tableName: "infografis",
+      tableName: "baner",
     }
   );
-  Infografis.beforeUpdate(async (instance, options) => {
+  Baner.beforeUpdate(async (instance, options) => {
     if (instance.changed("nama_file")) {
       instance.nama_file_updatedAt = new Date();
     }
   });
 
-  return Infografis;
+  return Baner;
 };
