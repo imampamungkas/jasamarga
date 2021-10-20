@@ -8,7 +8,6 @@ exports.findAll = (req, res) => {
   const nopage = req.query.nopage || 0;
   const search = req.query.search;
   const tipe = req.params.tipe;
-  const kelompok = req.params.kelompok;
 
   var condition = {
     [Op.and]: [
@@ -20,7 +19,6 @@ exports.findAll = (req, res) => {
             ],
           }
         : null,
-      kelompok ? { kelompok: kelompok } : null,
       { status: "publish" },
       { tipe: tipe },
       { lang: lang },
@@ -67,6 +65,34 @@ exports.findBySlug = (req, res) => {
 
   Artikel.findOne({
     where: { [Op.and]: [{ slug: slug }, { tipe: tipe }] },
+    include: ["gambar"],
+  })
+    .then((data) => {
+      if (data == null) {
+        res.status(404).send({
+          message: `Error retrieving ${tipe} with slug = ${slug}`,
+        });
+      } else {
+        res.send(data);
+      }
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: `Error retrieving ${tipe} with slug = ${slug}`,
+      });
+    });
+};
+
+
+
+// Find a single Artikel with an slug
+exports.findPageBySlug = (req, res) => {
+  const lang = req.params.lang;
+  const slug = req.params.slug;
+  const tipe = `page-${slug}`;
+
+  Artikel.findOne({
+    where: { [Op.and]: [{ lang: lang }, { tipe: tipe }] },
     include: ["gambar"],
   })
     .then((data) => {

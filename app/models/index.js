@@ -32,6 +32,10 @@ db.kantor = require("./kantor.model.js")(sequelize, Sequelize);
 db.kantorI18n = require("./kantor-i18n.model.js")(sequelize, Sequelize);
 db.kontak = require("./kontak.model.js")(sequelize, Sequelize);
 db.artikel = require("./artikel.model.js")(sequelize, Sequelize);
+db.page = require("./page.model.js")(sequelize, Sequelize);
+db.pageI18n = require("./page-i18n.model.js")(sequelize, Sequelize);
+db.gallery = require("./gallery.model.js")(sequelize, Sequelize);
+db.galleryI18n = require("./gallery-i18n.model.js")(sequelize, Sequelize);
 db.gambar = require("./gambar.model.js")(sequelize, Sequelize);
 db.tokens = require("./token.model.js")(sequelize, Sequelize);
 db.refresTokens = require("./refresh_token.model.js")(sequelize, Sequelize);
@@ -51,6 +55,15 @@ db.artikel.hasMany(db.gambar, {
 db.gambar.belongsTo(db.artikel, {
   foreignKey: "artikelUuid",
   as: "artikel",
+});
+
+db.page.hasMany(db.gallery, {
+  as: "gallery",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+db.gallery.belongsTo(db.page, {
+  as: "page",
 });
 
 // i18n relation
@@ -97,6 +110,24 @@ db.baner.hasMany(db.banerI18n, {
 });
 db.banerI18n.belongsTo(db.baner, {
   as: "baner",
+});
+
+db.page.hasMany(db.pageI18n, {
+  as: "i18n",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+db.pageI18n.belongsTo(db.page, {
+  as: "page",
+});
+
+db.gallery.hasMany(db.galleryI18n, {
+  as: "i18n",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+db.galleryI18n.belongsTo(db.gallery, {
+  as: "gallery",
 });
 
 module.exports = db;

@@ -32,10 +32,10 @@ exports.create = async (req, res) => {
   const artikel = {
     lang: req.body.lang || "id",
     judul: req.body.judul,
+    deskripsi: req.body.deskripsi,
     teks: req.body.teks,
     web_url: req.body.web_url,
     youtube_url: req.body.youtube_url,
-    kelompok: req.body.kelompok,
     tipe: tipe,
   };
 
@@ -54,24 +54,6 @@ exports.create = async (req, res) => {
         }
       });
       artikel["gambar_file"] = `${timestamp}/${file_name}`;
-    }
-  }
-
-  if (req.body.hasOwnProperty("video_file")) {
-    if (req.body.video_file) {
-      var file_name = req.body.video_file.nama;
-      const b = Buffer.from(req.body.video_file.data, "base64");
-      const timestamp = `artikel-${tipe}/${new Date().getTime()}`;
-      var dir = `public/uploads/${timestamp}/`;
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-      }
-      fs.writeFile(dir + file_name, b, function (err) {
-        if (!err) {
-          console.log("file is created", file_name);
-        }
-      });
-      artikel["video_file"] = `${timestamp}/${file_name}`;
     }
   }
 
@@ -113,7 +95,6 @@ exports.findAll = (req, res) => {
   const nopage = req.query.nopage || 0;
   const search = req.query.search;
   const status = req.query.status;
-  const kelompok = req.query.kelompok;
   var condition = {
     [Op.and]: [
       search
@@ -121,12 +102,12 @@ exports.findAll = (req, res) => {
             [Op.or]: [
               { judul: { [Op.like]: `%${search}%` } },
               { teks: { [Op.like]: `%${search}%` } },
+              { deskripsi: { [Op.like]: `%${search}%` } },
             ],
           }
         : null,
       status ? { status: status } : null,
       lang ? { lang: lang } : null,
-      kelompok ? { kelompok: kelompok } : null,
       { tipe: tipe },
     ],
   };
@@ -215,24 +196,6 @@ exports.update = async (req, res) => {
     }
   }
 
-  if (req.body.hasOwnProperty("video_file")) {
-    if (req.body.video_file) {
-      var file_name = req.body.video_file.nama;
-      const b = Buffer.from(req.body.video_file.data, "base64");
-      const timestamp = `artikel-${tipe}/${new Date().getTime()}`;
-      var dir = `public/uploads/${timestamp}/`;
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-      }
-      fs.writeFile(dir + file_name, b, function (err) {
-        if (!err) {
-          console.log("file is created", file_name);
-        }
-      });
-      artikel["video_file"] = `${timestamp}/${file_name}`;
-    }
-  }
-
   if (req.body.hasOwnProperty("dokumen_file")) {
     if (req.body.dokumen_file) {
       var file_name = req.body.dokumen_file.nama;
@@ -262,16 +225,6 @@ exports.update = async (req, res) => {
       } else {
         if (data.gambar_file !== null) {
           var dir = data.gambar_file.split("/");
-          console.log("dir", dir);
-          path = `public/uploads/${dir[0]}/${dir[1]}`;
-          fs.rm(path, { recursive: true }, (err) => {
-            if (err) {
-              console.log("err : ", err);
-            }
-          });
-        }
-        if (data.video_file !== null) {
-          var dir = data.video_file.split("/");
           console.log("dir", dir);
           path = `public/uploads/${dir[0]}/${dir[1]}`;
           fs.rm(path, { recursive: true }, (err) => {
@@ -328,15 +281,6 @@ exports.delete = (req, res) => {
             }
           });
         }
-        if (data.video_file !== null) {
-          var dir = data.video_file.split("/");
-          path = `public/uploads/${dir[0]}/${dir[1]}`;
-          fs.rm(path, { recursive: true }, (err) => {
-            if (err) {
-              console.log("err : ", err);
-            }
-          });
-        }
         if (data.dokumen_file !== null) {
           var dir = data.dokumen_file.split("/");
           path = `public/uploads/${dir[0]}/${dir[1]}`;
@@ -381,6 +325,135 @@ exports.deleteAll = (req, res) => {
       res.status(500).send({
         message:
           err.message || "Some error occurred while removing all artikel.",
+      });
+    });
+};
+
+// Find a single Artikel with an slug
+exports.findBySlug = (req, res) => {
+  const lang = req.params.lang;
+  const slug = req.params.slug;
+  const tipe = `page-${slug}`;
+
+  Artikel.findOne({
+    where: { [Op.and]: [{ lang: lang }, { tipe: tipe }] },
+    include: ["gambar"],
+  })
+    .then((data) => {
+      if (data == null) {
+        res.status(404).send({
+          message: `Error retrieving ${tipe} with slug = ${slug}`,
+        });
+      } else {
+        res.send(data);
+      }
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: `Error retrieving ${tipe} with slug = ${slug}`,
+      });
+    });
+};
+
+// Update a Artikel by the slug in the request path
+exports.updateBySlug = async (req, res) => {
+  const lang = req.params.lang;
+  const slug = req.params.slug;
+  // Validate request
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    res.status(400).json({ errors: errors.array() });
+    return;
+  }
+
+  const tipe = `page-${slug}`;
+  var artikel = req.body;
+  artikel["tipe"] = tipe;
+  artikel["lang"] = lang;
+
+  if (req.body.hasOwnProperty("gambar_file")) {
+    if (req.body.gambar_file) {
+      var file_name = req.body.gambar_file.nama;
+      const b = Buffer.from(req.body.gambar_file.data, "base64");
+      const timestamp = `artikel-${tipe}/${new Date().getTime()}`;
+      var dir = `public/uploads/${timestamp}/`;
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      fs.writeFile(dir + file_name, b, function (err) {
+        if (!err) {
+          console.log("file is created", file_name);
+        }
+      });
+      artikel["gambar_file"] = `${timestamp}/${file_name}`;
+    }
+  }
+
+  if (req.body.hasOwnProperty("dokumen_file")) {
+    if (req.body.dokumen_file) {
+      var file_name = req.body.dokumen_file.nama;
+      const b = Buffer.from(req.body.dokumen_file.data, "base64");
+      const timestamp = `artikel-${tipe}/${new Date().getTime()}`;
+      var dir = `public/uploads/${timestamp}/`;
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      fs.writeFile(dir + file_name, b, function (err) {
+        if (!err) {
+          console.log("file is created", file_name);
+        }
+      });
+      artikel["dokumen_file"] = `${timestamp}/${file_name}`;
+    }
+  }
+
+  Artikel.findOrCreate({
+    where: {
+      [Op.and]: [{ tipe: tipe }, { lang: lang }],
+    },
+    defaults: artikel,
+  })
+    .then((result) => {
+      const [data, created] = result;
+      if (data == null) {
+        res.status(404).send({
+          message: "Error updating Artikel with slug=" + slug,
+        });
+      } else {
+        if (!created) {
+          if (data.gambar_file !== null) {
+            var dir = data.gambar_file.split("/");
+            console.log("dir", dir);
+            path = `public/uploads/${dir[0]}/${dir[1]}`;
+            fs.rm(path, { recursive: true }, (err) => {
+              if (err) {
+                console.log("err : ", err);
+              }
+            });
+          }
+          if (data.dokumen_file !== null) {
+            var dir = data.dokumen_file.split("/");
+            console.log("dir", dir);
+            path = `public/uploads/${dir[0]}/${dir[1]}`;
+            fs.rm(path, { recursive: true }, (err) => {
+              if (err) {
+                console.log("err : ", err);
+              }
+            });
+          }
+        }
+        data.update(artikel);
+        res.send({
+          message: "Artikel was updated successfully.",
+          data: data,
+        });
+      }
+    })
+    .catch((err) => {
+      console.log("err", err);
+      res.status(500).send({
+        message: "Error updating Artikel with slug=" + slug,
       });
     });
 };

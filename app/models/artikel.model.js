@@ -27,12 +27,11 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      deskripsi: {
+        type: Sequelize.TEXT,
+      },
       teks: {
         type: Sequelize.TEXT("long"),
-      },
-      kelompok: {
-        type: Sequelize.STRING,
-        defaultValue: null,
       },
       gambar_file: {
         type: Sequelize.STRING,
@@ -46,20 +45,6 @@ module.exports = (sequelize, Sequelize) => {
         },
         set(value) {
           throw new Error("Do not try to set the `gambar_file_url` value!");
-        },
-      },
-      video_file: {
-        type: Sequelize.STRING,
-      },
-      video_file_url: {
-        type: Sequelize.VIRTUAL,
-        get() {
-          return this.video_file
-            ? `${process.env.BASE_URL}/uploads/${this.video_file}`
-            : null;
-        },
-        set(value) {
-          throw new Error("Do not try to set the `video_file_url` value!");
         },
       },
       dokumen_file: {

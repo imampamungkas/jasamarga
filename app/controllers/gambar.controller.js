@@ -5,14 +5,14 @@ const Gambar = db.gambar;
 const Artikel = db.artikel;
 const Op = db.Sequelize.Op;
 
-const { body, param } = require("express-validator");
+const { body } = require("express-validator");
 const { validationResult } = require("express-validator");
 
 exports.validate = (method) => {
   switch (method) {
     case "createGambar": {
       return [
-        param("uuid").custom(async (value) => {
+        body("artikelUuid").custom(async (value) => {
           if (value) {
             return Artikel.findByPk(value).then((artikel) => {
               if (artikel == null) {
@@ -25,7 +25,7 @@ exports.validate = (method) => {
     }
     case "updateGambar": {
       return [
-        param("uuid").custom(async (value) => {
+        body("artikelUuid").custom(async (value) => {
           if (value) {
             return Artikel.findByPk(value).then((artikel) => {
               if (artikel == null) {
@@ -48,11 +48,14 @@ exports.create = async (req, res) => {
     return;
   }
 
-  const tipe = req.params.tipe;
-  const artikelUuid = req.params.uuid;
+  const artikelUuid = req.body.artikelUuid;
+  const artikel = await Artikel.findByPk(artikelUuid);
+  const tipe = artikel.tipe;
   // Create a Gambar
   const gambar = {
     artikelUuid: artikelUuid,
+    judul: req.body.judul,
+    deskripsi: req.body.deskripsi,
     urutan: req.body.urutan,
   };
 
@@ -89,8 +92,7 @@ exports.create = async (req, res) => {
 
 // Update a Gambar by the uuid in the request
 exports.updateBulk = async (req, res) => {
-  const tipe = req.params.tipe;
-  const artikelUuid = req.params.uuid;
+  const artikelUuid = req.params.artikelUuid;
   const data = req.body.data;
   let messages = [];
   if (data instanceof Array && data.length > 0) {
@@ -98,7 +100,7 @@ exports.updateBulk = async (req, res) => {
       const uuid = data[i].uuid;
       delete data[i].uuid;
       var result = await Gambar.update(data[i], {
-        where: { uuid: uuid },
+        where: { [Op.and]: [{ artikelUuid: artikelUuid }, { uuid: uuid }] },
       });
       if (result[0] > 0) {
         messages.push(`Gambar with uuid ${uuid} was updated successfully.`);

@@ -1,7 +1,6 @@
 module.exports = (app) => {
   const passport = require("passport");
   const artikel = require("../controllers/artikel.controller.js");
-  const gambar = require("../controllers/gambar.controller.js");
   const authorize = require("../helpers/authorize");
   const Role = require("../helpers/role");
 
@@ -24,15 +23,6 @@ module.exports = (app) => {
 
   // Delete all artikel
   router.delete("/:tipe", artikel.deleteAll);
-
-  // Create a new artikel gambar
-  router.post("/:tipe/:uuid/gambar", gambar.validate("createGambar"), gambar.create);
-
-  // Update a artikel gambar with id
-  router.put("/:tipe/:uuid/gambar", gambar.updateBulk);
-
-  // Delete a artikel gambar with id
-  router.delete("/:tipe/gambar/:uuid", gambar.delete);
 
   app.use(
     "/api/artikel",

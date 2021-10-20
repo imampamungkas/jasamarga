@@ -7,6 +7,12 @@ module.exports = (sequelize, Sequelize) => {
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
       },
+      judul: {
+        type: Sequelize.STRING,
+      },
+      deskripsi: {
+        type: Sequelize.TEXT,
+      },
       gambar_file: {
         type: Sequelize.STRING,
       },

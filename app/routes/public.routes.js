@@ -8,6 +8,7 @@ module.exports = (app) => {
   const kantor = require("../controllers/public/kantor.controller.js");
   const artikel = require("../controllers/public/artikel.controller.js");
   const kontak = require("../controllers/public/kontak.controller.js");
+  const page = require("../controllers/public/page.controller.js");
   var router = require("express").Router();
 
   // Retrieve all baner
@@ -44,6 +45,9 @@ module.exports = (app) => {
   router.get("/artikel/:tipe", artikel.findAll);
   // Retrieve artikel
   router.get("/artikel/:tipe/:slug", artikel.findBySlug);
+
+  // Retrieve page
+  router.get("/page/:slug", page.findOne);
 
   // Create a new kontak
   router.post("/kontak", kontak.validate("createKontak"), kontak.create);
