@@ -29,7 +29,7 @@ module.exports = (app) => {
   // Retrieve all dokumen
   router.get("/dokumen/:tipe", dokumen.findAll);
   // Retrieve dokumen
-  router.get("/dokumen/:tipe/:id", dokumen.findOne);
+  router.get("/dokumen/:tipe/:uuid", dokumen.findOne);
 
   // Retrieve all asean
   router.get("/asean", asean.findAll);
@@ -41,9 +41,9 @@ module.exports = (app) => {
   // Retrieve kantor
   router.get("/kantor/:uuid", kantor.findByPk);
 
-  // Retrieve all artikel
+  // Retrieve all post
   router.get("/post/:tipe", post.findAll);
-  // Retrieve artikel
+  // Retrieve post
   router.get("/post/:tipe/:uuid", post.findOne);
 
   // Retrieve page

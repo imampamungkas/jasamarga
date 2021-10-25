@@ -19,18 +19,19 @@ db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
 db.users = require("./user.model.js")(sequelize, Sequelize);
+db.tokens = require("./token.model.js")(sequelize, Sequelize);
+db.refresTokens = require("./refresh_token.model.js")(sequelize, Sequelize);
+db.kontak = require("./kontak.model.js")(sequelize, Sequelize);
 db.baner = require("./baner.model.js")(sequelize, Sequelize);
 db.banerI18n = require("./baner-i18n.model.js")(sequelize, Sequelize);
 db.pejabat = require("./pejabat.model.js")(sequelize, Sequelize);
 db.pejabatI18n = require("./pejabat-i18n.model.js")(sequelize, Sequelize);
 db.penghargaan = require("./penghargaan.model.js")(sequelize, Sequelize);
 db.penghargaanI18n = require("./penghargaan-i18n.model.js")(sequelize, Sequelize);
-db.dokumen = require("./dokumen.model.js")(sequelize, Sequelize);
 db.asean = require("./asean.model.js")(sequelize, Sequelize);
 db.aseanI18n = require("./asean-i18n.model.js")(sequelize, Sequelize);
 db.kantor = require("./kantor.model.js")(sequelize, Sequelize);
 db.kantorI18n = require("./kantor-i18n.model.js")(sequelize, Sequelize);
-db.kontak = require("./kontak.model.js")(sequelize, Sequelize);
 db.page = require("./page.model.js")(sequelize, Sequelize);
 db.pageI18n = require("./page-i18n.model.js")(sequelize, Sequelize);
 db.gallery = require("./gallery.model.js")(sequelize, Sequelize);
@@ -39,8 +40,10 @@ db.post = require("./post.model.js")(sequelize, Sequelize);
 db.postI18n = require("./post-i18n.model.js")(sequelize, Sequelize);
 db.photo = require("./photo.model.js")(sequelize, Sequelize);
 db.photoI18n = require("./photo-i18n.model.js")(sequelize, Sequelize);
-db.tokens = require("./token.model.js")(sequelize, Sequelize);
-db.refresTokens = require("./refresh_token.model.js")(sequelize, Sequelize);
+db.dokumen = require("./dokumen.model.js")(sequelize, Sequelize);
+db.dokumenI18n = require("./dokumen-i18n.model.js")(sequelize, Sequelize);
+db.presskit = require("./presskit.model.js")(sequelize, Sequelize);
+db.presskitI18n = require("./presskit-i18n.model.js")(sequelize, Sequelize);
 
 db.users.hasMany(db.tokens, { as: "tokens" });
 db.users.hasMany(db.refresTokens, { as: "refresTokens" });
@@ -147,6 +150,24 @@ db.photo.hasMany(db.photoI18n, {
 });
 db.photoI18n.belongsTo(db.photo, {
   as: "photo",
+});
+
+db.dokumen.hasMany(db.dokumenI18n, {
+  as: "i18n",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+db.dokumenI18n.belongsTo(db.dokumen, {
+  as: "dokumen",
+});
+
+db.presskit.hasMany(db.presskitI18n, {
+  as: "i18n",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+db.presskitI18n.belongsTo(db.presskit, {
+  as: "presskit",
 });
 
 module.exports = db;

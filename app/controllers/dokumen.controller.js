@@ -1,17 +1,22 @@
+//@ts-check
 const paginate = require("express-paginate");
 const fs = require("fs");
 const db = require("../models");
 const Dokumen = db.dokumen;
+const DokumenI18n = db.dokumenI18n;
 const Op = db.Sequelize.Op;
 
 const { body } = require("express-validator");
 const { validationResult } = require("express-validator");
-const { timeStamp } = require("console");
 
 exports.validate = (method) => {
   switch (method) {
     case "createDokumen": {
-      return [body("judul").exists(), body("urutan").exists()];
+      return [
+        // body("nama").exists(),
+        // body("deskripsi").exists(),
+        // body("updatedAt").exists(),
+      ];
     }
     case "updateDokumen": {
       return [];
@@ -29,20 +34,12 @@ exports.create = async (req, res) => {
     return;
   }
 
-  // Create a Dokumen
-  const dokumen = {
-    lang: req.body.lang || "id",
-    judul: req.body.judul,
-    tahun: req.body.tahun,
-    tipe: tipe,
-    nama_file: file_name,
-    urutan: req.body.urutan,
-  };
-
-  if (req.body.hasOwnProperty("nama_file")) {
-    if (req.body.nama_file) {
-      var file_name = req.body.nama_file.nama;
-      const b = Buffer.from(req.body.nama_file.data, "base64");
+  const { i18n, ...dokumen } = req.body;
+  dokumen["tipe"] = tipe;
+  if (dokumen.hasOwnProperty("cover_file")) {
+    if (dokumen.cover_file) {
+      var file_name = dokumen.cover_file.nama;
+      const b = Buffer.from(dokumen.cover_file.data, "base64");
       const timestamp = `dokumen-${tipe}/${new Date().getTime()}`;
       var dir = `public/uploads/${timestamp}/`;
       if (!fs.existsSync(dir)) {
@@ -53,14 +50,13 @@ exports.create = async (req, res) => {
           console.log("file is created", file_name);
         }
       });
-      dokumen["nama_file"] = `${timestamp}/${file_name}`;
+      dokumen["cover_file"] = `${timestamp}/${file_name}`;
     }
   }
-
-  if (req.body.hasOwnProperty("thumbnail")) {
-    if (req.body.thumbnail) {
-      var file_name = req.body.thumbnail.nama;
-      const b = Buffer.from(req.body.thumbnail.data, "base64");
+  if (dokumen.hasOwnProperty("dokumen_file")) {
+    if (dokumen.dokumen_file) {
+      var file_name = dokumen.dokumen_file.nama;
+      const b = Buffer.from(dokumen.dokumen_file.data, "base64");
       const timestamp = `dokumen-${tipe}/${new Date().getTime()}`;
       var dir = `public/uploads/${timestamp}/`;
       if (!fs.existsSync(dir)) {
@@ -71,18 +67,26 @@ exports.create = async (req, res) => {
           console.log("file is created", file_name);
         }
       });
-      dokumen["thumbnail"] = `${timestamp}/${file_name}`;
+      dokumen["dokumen_file"] = `${timestamp}/${file_name}`;
     }
   }
 
   // Save Dokumen in the database
   Dokumen.create(dokumen)
-    .then((data) => {
+    .then(async (data) => {
+      if (i18n instanceof Array && i18n.length > 0) {
+        for (var i = 0; i < i18n.length; i++) {
+          i18n[i]["dokumenUuid"] = data.uuid;
+          await DokumenI18n.create(i18n[i]);
+        }
+        await data.reload({ include: 'i18n' });
+      }
       res.send(data);
     })
     .catch((err) => {
       res.status(500).send({
-        message: err.message || "Some error occurred while creating the Dokumen.",
+        message:
+          err.message || "Some error occurred while creating the Dokumen.",
       });
     });
 };
@@ -90,38 +94,66 @@ exports.create = async (req, res) => {
 // Retrieve all Dokumen from the database.
 exports.findAll = (req, res) => {
   const tipe = req.params.tipe;
-  const lang = req.query.lang;
   const nopage = req.query.nopage || 0;
   const search = req.query.search;
+  const tahun = req.query.tahun;
   const status = req.query.status;
+
   var condition = {
     [Op.and]: [
       search
         ? {
-            [Op.or]: [
-              { judul: { [Op.like]: `%${search}%` } },
-              { nama_file: { [Op.like]: `%${search}%` } },
-            ],
-          }
+          [Op.or]: [
+            { cover_file: { [Op.like]: `%${search}%` } },
+            { dokumen_file: { [Op.like]: `%${search}%` } },
+          ],
+        }
         : null,
+      tahun ? { tahun: tahun } : null,
       status ? { status: status } : null,
-      lang ? { lang: lang } : null,
       { tipe: tipe },
+    ],
+  };
+
+  var condition_i18n = {
+    [Op.and]: [
+      search
+        ? {
+          [Op.or]: [
+            { '$i18n.nama$': { [Op.like]: `%${search}%` } },
+            { '$i18n.deskripsi$': { [Op.like]: `%${search}%` } },
+          ],
+        }
+        : null,
     ],
   };
 
   var query =
     nopage == 1
       ? Dokumen.findAll({
-          where: condition,
-          order: [["urutan", "DESC"]],
-        })
+        where: condition,
+        include: [
+          {
+            model: DokumenI18n,
+            as: 'i18n',
+            where: condition_i18n,
+          }
+        ],
+        order: [["updatedAt", "DESC"]],
+      })
       : Dokumen.findAndCountAll({
-          where: condition,
-          limit: req.query.limit,
-          offset: req.skip,
-          order: [["urutan", "DESC"]],
-        });
+        where: condition,
+        include: [
+          {
+            model: DokumenI18n,
+            as: 'i18n',
+            where: condition_i18n,
+          }
+        ],
+        limit: req.query.limit,
+        offset: req.skip,
+        order: [["updatedAt", "DESC"]],
+      });
   query
     .then((results) => {
       if (nopage == 1) {
@@ -139,23 +171,30 @@ exports.findAll = (req, res) => {
     })
     .catch((err) => {
       res.status(500).send({
-        message: err.message || "Some error occurred while retrieving dokumen.",
+        message:
+          err.message || "Some error occurred while retrieving dokumen.",
       });
     });
 };
 
-// Find a single Dokumen with an id
+// Find a single Dokumen with an uuid
 exports.findOne = (req, res) => {
   const tipe = req.params.tipe;
-  const id = req.params.id;
+  const uuid = req.params.uuid;
 
   Dokumen.findOne({
-    where: { [Op.and]: [{ id: id }, { tipe: tipe }] },
+    where: { [Op.and]: [{ uuid: uuid }, { tipe: tipe }] },
+    include: [
+      {
+        model: DokumenI18n,
+        as: 'i18n',
+      }
+    ]
   })
     .then((data) => {
       if (data == null) {
         res.status(404).send({
-          message: "Error retrieving Dokumen with id=" + id,
+          message: "Error retrieving Dokumen with uuid=" + uuid,
         });
       } else {
         res.send(data);
@@ -163,21 +202,22 @@ exports.findOne = (req, res) => {
     })
     .catch((err) => {
       res.status(500).send({
-        message: "Error retrieving Dokumen with id=" + id,
+        message: "Error retrieving Dokumen with uuid=" + uuid,
       });
     });
 };
 
-// Update a Dokumen by the id in the request
+// Update a Dokumen by the uuid in the request
 exports.update = async (req, res) => {
   const tipe = req.params.tipe;
-  const id = req.params.id;
-  let dokumen = req.body;
+  const uuid = req.params.uuid;
+
+  const { i18n, ...dokumen } = req.body;
   dokumen["tipe"] = tipe;
-  if (req.body.hasOwnProperty("nama_file")) {
-    if (req.body.nama_file) {
-      file_name = req.body.nama_file.nama;
-      const b = Buffer.from(req.body.nama_file.data, "base64");
+  if (dokumen.hasOwnProperty("cover_file")) {
+    if (dokumen.cover_file) {
+      var file_name = dokumen.cover_file.nama;
+      const b = Buffer.from(dokumen.cover_file.data, "base64");
       const timestamp = `dokumen-${tipe}/${new Date().getTime()}`;
       var dir = `public/uploads/${timestamp}/`;
       if (!fs.existsSync(dir)) {
@@ -188,15 +228,15 @@ exports.update = async (req, res) => {
           console.log("file is created", file_name);
         }
       });
-      dokumen["nama_file"] = `${timestamp}/${file_name}`;
+      dokumen["cover_file"] = `${timestamp}/${file_name}`;
     } else {
-      delete dokumen.nama_file;
+      delete dokumen.cover_file;
     }
   }
-  if (req.body.hasOwnProperty("thumbnail")) {
-    if (req.body.thumbnail) {
-      file_name = req.body.thumbnail.nama;
-      const b = Buffer.from(req.body.thumbnail.data, "base64");
+  if (dokumen.hasOwnProperty("dokumen_file")) {
+    if (dokumen.dokumen_file) {
+      var file_name = dokumen.dokumen_file.nama;
+      const b = Buffer.from(dokumen.dokumen_file.data, "base64");
       const timestamp = `dokumen-${tipe}/${new Date().getTime()}`;
       var dir = `public/uploads/${timestamp}/`;
       if (!fs.existsSync(dir)) {
@@ -207,34 +247,22 @@ exports.update = async (req, res) => {
           console.log("file is created", file_name);
         }
       });
-      dokumen["thumbnail"] = `${timestamp}/${file_name}`;
+      dokumen["dokumen_file"] = `${timestamp}/${file_name}`;
     } else {
-      delete dokumen.thumbnail;
+      delete dokumen.dokumen_file;
     }
   }
-  Dokumen.findOne({
-    where: { [Op.and]: [{ id: id }, { tipe: tipe }] },
-  })
-    .then((data) => {
+  Dokumen.findByPk(uuid)
+    .then(async (data) => {
       if (data == null) {
         res.status(404).send({
-          message: "Error updating Dokumen with id=" + id,
+          message: "Error updating Dokumen with uuid=" + uuid,
         });
       } else {
-        if (data.nama_file !== null) {
-          var dir = data.nama_file.split("/");
+        if (data.cover_file !== null) {
+          var dir = data.cover_file.split("/");
           console.log("dir", dir);
-          path = `public/uploads/${dir[0]}/${dir[1]}`;
-          fs.rm(path, { recursive: true }, (err) => {
-            if (err) {
-              console.log("err : ", err);
-            }
-          });
-        }
-        if (data.thumbnail !== null) {
-          var dir = data.thumbnail.split("/");
-          console.log("dir", dir);
-          path = `public/uploads/${dir[0]}/${dir[1]}`;
+          var path = `public/uploads/${dir[0]}/${dir[1]}`;
           fs.rm(path, { recursive: true }, (err) => {
             if (err) {
               console.log("err : ", err);
@@ -242,6 +270,16 @@ exports.update = async (req, res) => {
           });
         }
         data.update(dokumen);
+
+        if (i18n instanceof Array && i18n.length > 0) {
+          for (var i = 0; i < i18n.length; i++) {
+            const { lang, ...trans } = i18n[i];
+            await DokumenI18n.update(trans, {
+              where: { [Op.and]: [{ dokumenUuid: uuid }, { lang: lang }] },
+            });
+          }
+          await data.reload({ include: 'i18n' });
+        }
         res.send({
           message: "Dokumen was updated successfully.",
           data: data,
@@ -251,68 +289,25 @@ exports.update = async (req, res) => {
     .catch((err) => {
       console.log("err", err);
       res.status(500).send({
-        message: "Error updating Dokumen with id=" + id,
+        message: "Error updating Dokumen with uuid=" + uuid,
       });
     });
 };
 
-// Update a Dokumen by the id in the request
-exports.updateBulk = async (req, res) => {
-  const tipe = req.params.tipe;
-  const data = req.body.data;
-  let messages = [];
-  if (data instanceof Array && data.length > 0) {
-    for (var i = 0; i < data.length; i++) {
-      const id = data[i].id;
-      delete data[i].id;
-      data[i].tipe = tipe;
-      var result = await Dokumen.update(data[i], {
-        where: { id: id },
-      });
-      if (result[0] > 0) {
-        messages.push(`Dokumen with id ${id} was updated successfully.`);
-      } else {
-        messages.push(
-          `Cannot update Dokumen with id=${id}. Maybe Dokumen was not found or req.body is empty!`
-        );
-      }
-    }
-    res.send({
-      message: messages,
-    });
-  } else {
-    res.status(400).send({
-      message: "Invalid JSON data!",
-    });
-  }
-};
-
-// Delete a Dokumen with the specified id in the request
+// Delete a Dokumen with the specified uuid in the request
 exports.delete = (req, res) => {
-  const tipe = req.params.tipe;
-  const id = req.params.id;
+  const uuid = req.params.uuid;
 
-  Dokumen.findOne({
-    where: { [Op.and]: [{ id: id }, { tipe: tipe }] },
-  })
+  Dokumen.findByPk(uuid)
     .then((data) => {
       if (data == null) {
         res.status(404).send({
-          message: "Error deleting Dokumen with id=" + id,
+          message: "Error deleting Dokumen with uuid=" + uuid,
         });
       } else {
-        if (data.nama_file !== null) {
-          var dir = data.nama_file.split("/");
-          path = `public/uploads/${dir[0]}/${dir[1]}`;
-          fs.rm(path, { recursive: true }, (err) => {
-            if (err) {
-              console.log("err : ", err);
-            }
-          });
-        }
-        if (data.thumbnail !== null) {
-          var dir = data.thumbnail.split("/");
-          path = `public/uploads/${dir[0]}/${dir[1]}`;
+        if (data.cover_file !== null) {
+          var dir = data.cover_file.split("/");
+          var path = `public/uploads/${dir[0]}/${dir[1]}`;
           fs.rm(path, { recursive: true }, (err) => {
             if (err) {
               console.log("err : ", err);
@@ -329,7 +324,7 @@ exports.delete = (req, res) => {
     .catch((err) => {
       console.log("err", err);
       res.status(500).send({
-        message: "Error deleting Dokumen with id=" + id,
+        message: "Error deleting Dokumen with uuid=" + uuid,
       });
     });
 };
@@ -342,7 +337,7 @@ exports.deleteAll = (req, res) => {
     truncate: false,
   })
     .then((nums) => {
-      path = `public/uploads/dokumen-${tipe}`;
+      var path = `public/uploads/dokumen-${tipe}`;
       fs.rm(path, { recursive: true }, (err) => {
         if (err) {
           console.log("err : ", err);
@@ -352,7 +347,8 @@ exports.deleteAll = (req, res) => {
     })
     .catch((err) => {
       res.status(500).send({
-        message: err.message || "Some error occurred while removing all dokumen.",
+        message:
+          err.message || "Some error occurred while removing all dokumen.",
       });
     });
 };

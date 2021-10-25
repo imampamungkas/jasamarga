@@ -2,65 +2,50 @@ module.exports = (sequelize, Sequelize) => {
   const Dokumen = sequelize.define(
     "dokumen",
     {
-      lang: {
-        type: Sequelize.STRING(2),
-        defaultValue: "id",
+      uuid: {
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
+        primaryKey: true,
       },
       tipe: {
-        type: Sequelize.ENUM(
-          "dokumen-tata-kelola",
-          "laporan-gcg",
-          "laporan-csr",
-          "praktik-csr"
-        ),
-        defaultValue: "dokumen-tata-kelola",
-      },
-      judul: {
         type: Sequelize.STRING,
+        defaultValue: "beranda",
       },
       tahun: {
         type: Sequelize.STRING(4),
-        allowNull: true,
         defaultValue: null,
       },
-      thumbnail: {
+      url_link: {
         type: Sequelize.STRING,
-        allowNull: true,
         defaultValue: null,
       },
-      thumbnail_url: {
+      cover_file: {
+        type: Sequelize.STRING,
+      },
+      cover_file_url: {
         type: Sequelize.VIRTUAL,
         get() {
-          return this.thumbnail
-            ? `${process.env.BASE_URL}/uploads/${this.thumbnail}`
+          return this.cover_file
+            ? `${process.env.BASE_URL}/uploads/${this.cover_file}`
             : null;
         },
         set(value) {
-          throw new Error("Do not try to set the `thumbnail_url` value!");
+          throw new Error("Do not try to set the `cover_file_url` value!");
         },
       },
-      nama_file: {
+      dokumen_file: {
         type: Sequelize.STRING,
       },
-      nama_file_updatedAt: {
-        type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.NOW,
-      },
-      nama_file_url: {
+      dokumen_file_url: {
         type: Sequelize.VIRTUAL,
         get() {
-          return this.nama_file
-            ? `${process.env.BASE_URL}/uploads/${this.nama_file}`
+          return this.dokumen_file
+            ? `${process.env.BASE_URL}/uploads/${this.dokumen_file}`
             : null;
         },
         set(value) {
-          throw new Error("Do not try to set the `nama_file_url` value!");
+          throw new Error("Do not try to set the `dokumen_file_url` value!");
         },
-      },
-      urutan: {
-        type: Sequelize.INTEGER,
-        defaultValue: 0,
       },
       status: {
         type: Sequelize.ENUM("draft", "publish", "not publish"),
@@ -71,11 +56,6 @@ module.exports = (sequelize, Sequelize) => {
       tableName: "dokumen",
     }
   );
-  Dokumen.beforeUpdate(async (instance, options) => {
-    if (instance.changed("nama_file")) {
-      instance.nama_file_updatedAt = new Date();
-    }
-  });
 
   return Dokumen;
 };
