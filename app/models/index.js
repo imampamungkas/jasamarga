@@ -31,12 +31,14 @@ db.aseanI18n = require("./asean-i18n.model.js")(sequelize, Sequelize);
 db.kantor = require("./kantor.model.js")(sequelize, Sequelize);
 db.kantorI18n = require("./kantor-i18n.model.js")(sequelize, Sequelize);
 db.kontak = require("./kontak.model.js")(sequelize, Sequelize);
-db.artikel = require("./artikel.model.js")(sequelize, Sequelize);
 db.page = require("./page.model.js")(sequelize, Sequelize);
 db.pageI18n = require("./page-i18n.model.js")(sequelize, Sequelize);
 db.gallery = require("./gallery.model.js")(sequelize, Sequelize);
 db.galleryI18n = require("./gallery-i18n.model.js")(sequelize, Sequelize);
-db.gambar = require("./gambar.model.js")(sequelize, Sequelize);
+db.post = require("./post.model.js")(sequelize, Sequelize);
+db.postI18n = require("./post-i18n.model.js")(sequelize, Sequelize);
+db.photo = require("./photo.model.js")(sequelize, Sequelize);
+db.photoI18n = require("./photo-i18n.model.js")(sequelize, Sequelize);
 db.tokens = require("./token.model.js")(sequelize, Sequelize);
 db.refresTokens = require("./refresh_token.model.js")(sequelize, Sequelize);
 
@@ -47,16 +49,6 @@ db.tokens.belongsTo(db.users, {
   as: "user",
 });
 
-db.artikel.hasMany(db.gambar, {
-  as: "gambar",
-  onDelete: "CASCADE",
-  onUpdate: "CASCADE",
-});
-db.gambar.belongsTo(db.artikel, {
-  foreignKey: "artikelUuid",
-  as: "artikel",
-});
-
 db.page.hasMany(db.gallery, {
   as: "gallery",
   onDelete: "CASCADE",
@@ -64,6 +56,15 @@ db.page.hasMany(db.gallery, {
 });
 db.gallery.belongsTo(db.page, {
   as: "page",
+});
+
+db.post.hasMany(db.photo, {
+  as: "photo",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+db.photo.belongsTo(db.post, {
+  as: "post",
 });
 
 // i18n relation
@@ -128,6 +129,24 @@ db.gallery.hasMany(db.galleryI18n, {
 });
 db.galleryI18n.belongsTo(db.gallery, {
   as: "gallery",
+});
+
+db.post.hasMany(db.postI18n, {
+  as: "i18n",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+db.postI18n.belongsTo(db.post, {
+  as: "post",
+});
+
+db.photo.hasMany(db.photoI18n, {
+  as: "i18n",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+db.photoI18n.belongsTo(db.photo, {
+  as: "photo",
 });
 
 module.exports = db;

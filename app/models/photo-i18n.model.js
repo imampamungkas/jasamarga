@@ -1,9 +1,10 @@
 module.exports = (sequelize, Sequelize) => {
-  const PageI18n = sequelize.define(
-    "page_i18n",
+  const PhotoI18n = sequelize.define(
+    "photo_i18n",
     {
-      pageSlug: {
-        type: Sequelize.STRING,
+      photoUuid: {
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
       },
       lang: {
@@ -17,21 +18,12 @@ module.exports = (sequelize, Sequelize) => {
       deskripsi: {
         type: Sequelize.TEXT,
       },
-      teks: {
-        type: Sequelize.TEXT("long"),
-      },
-      visi: {
-        type: Sequelize.TEXT,
-      },
-      misi: {
-        type: Sequelize.TEXT,
-      },
     },
     {
-      tableName: "page_i18n",
+      tableName: "photo_i18n",
       timestamps: false,
     }
   );
 
-  return PageI18n;
+  return PhotoI18n;
 };

@@ -58,12 +58,13 @@ require("./app/routes/baner.routes")(app);
 require("./app/routes/pejabat.routes")(app);
 require("./app/routes/penghargaan.routes")(app);
 require("./app/routes/dokumen.routes")(app);
-require("./app/routes/artikel.routes")(app);
 require("./app/routes/asean.routes")(app);
 require("./app/routes/kantor.routes")(app);
 require("./app/routes/kontak.routes")(app);
 require("./app/routes/page.routes")(app);
 require("./app/routes/gallery.routes")(app);
+require("./app/routes/post.routes")(app);
+require("./app/routes/photo.routes")(app);
 var upload = require("./upload.js");
 app.post("/upload", upload);
 

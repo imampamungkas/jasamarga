@@ -1,15 +1,19 @@
 //@ts-check
 const paginate = require("express-paginate");
 const db = require("../../models");
-const PejabatI18n = db.pejabatI18n;
-const Pejabat = db.pejabat;
+const Post = db.post;
+const PostI18n = db.postI18n;
 const Op = db.Sequelize.Op;
 
+const use_publish = [
+  'penghargaan',
+  'press-release',
+  'program-incindental'
+]
 exports.findAll = (req, res) => {
   const lang = req.query.lang || "id";
   const nopage = req.query.nopage || 0;
   const search = req.query.search;
-  const kategori = req.query.kategori;
   const tipe = req.params.tipe;
 
   var condition = {
@@ -21,8 +25,7 @@ exports.findAll = (req, res) => {
           ],
         }
         : null,
-      { status: "publish" },
-      kategori ? { kategori: kategori } : null,
+      use_publish.includes(tipe) ? { status: "publish" } : null,
       { tipe: tipe },
     ],
   };
@@ -34,35 +37,33 @@ exports.findAll = (req, res) => {
           [Op.or]: [
             { '$i18n.nama$': { [Op.like]: `%${search}%` } },
             { '$i18n.deskripsi$': { [Op.like]: `%${search}%` } },
-            { '$i18n.jabatan$': { [Op.like]: `%${search}%` } },
           ],
         }
         : null,
       { '$i18n.lang$': lang },
     ],
   };
-
   var query =
     nopage == 1
-      ? Pejabat.findAll({
+      ? Post.findAll({
         where: condition,
         include: {
-          model: PejabatI18n,
+          model: PostI18n,
           as: 'i18n',
           where: condition_i18n,
         },
-        order: [["urutan", "DESC"]],
+        order: [["createdAt", "DESC"]],
       })
-      : Pejabat.findAndCountAll({
+      : Post.findAndCountAll({
         where: condition,
         include: {
-          model: PejabatI18n,
+          model: PostI18n,
           as: 'i18n',
           where: condition_i18n,
         },
         limit: req.query.limit,
         offset: req.skip,
-        order: [["urutan", "DESC"]],
+        order: [["createdAt", "DESC"]],
       });
   query
     .then((results) => {
@@ -86,18 +87,22 @@ exports.findAll = (req, res) => {
     });
 };
 
-// Find a single Pejabat with an uuid
+// Find a single Post with an id
 exports.findOne = (req, res) => {
   const uuid = req.params.uuid;
   const tipe = req.params.tipe;
   const lang = req.query.lang || "id";
 
-  Pejabat.findOne({
+  Post.findOne({
     where: {
-      [Op.and]: [{ uuid: uuid }, { tipe: tipe }]
+      [Op.and]: [
+        { uuid: uuid },
+        { tipe: tipe },
+        use_publish.includes(tipe) ? { status: "publish" } : null,
+      ]
     },
     include: {
-      model: PejabatI18n,
+      model: PostI18n,
       as: 'i18n',
       where: { '$i18n.lang$': lang },
     },

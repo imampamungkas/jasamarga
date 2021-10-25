@@ -6,7 +6,7 @@ module.exports = (app) => {
   const dokumen = require("../controllers/public/dokumen.controller.js");
   const asean = require("../controllers/public/asean.controller.js");
   const kantor = require("../controllers/public/kantor.controller.js");
-  const artikel = require("../controllers/public/artikel.controller.js");
+  const post = require("../controllers/public/post.controller.js");
   const kontak = require("../controllers/public/kontak.controller.js");
   const page = require("../controllers/public/page.controller.js");
   var router = require("express").Router();
@@ -42,9 +42,9 @@ module.exports = (app) => {
   router.get("/kantor/:uuid", kantor.findByPk);
 
   // Retrieve all artikel
-  router.get("/artikel/:tipe", artikel.findAll);
+  router.get("/post/:tipe", post.findAll);
   // Retrieve artikel
-  router.get("/artikel/:tipe/:slug", artikel.findBySlug);
+  router.get("/post/:tipe/:uuid", post.findOne);
 
   // Retrieve page
   router.get("/page/:slug", page.findOne);

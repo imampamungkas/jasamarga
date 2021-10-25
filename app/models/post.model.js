@@ -1,6 +1,6 @@
 module.exports = (sequelize, Sequelize) => {
-  const Pejabat = sequelize.define(
-    "pejabat",
+  const Post = sequelize.define(
+    "post",
     {
       uuid: {
         type: Sequelize.UUID,
@@ -8,18 +8,8 @@ module.exports = (sequelize, Sequelize) => {
         primaryKey: true,
       },
       tipe: {
-        type: Sequelize.ENUM(
-          "dewan-komisaris",
-          "direksi",
-          "corporate-secretary",
-          "auditor",
-          "komite"
-        ),
-        defaultValue: "dewan-komisaris",
-      },
-      kategori: {
         type: Sequelize.STRING,
-        defaultValue: null,
+        defaultValue: "beranda",
       },
       nama_file: {
         type: Sequelize.STRING,
@@ -40,24 +30,20 @@ module.exports = (sequelize, Sequelize) => {
           throw new Error("Do not try to set the `nama_file_url` value!");
         },
       },
-      urutan: {
-        type: Sequelize.INTEGER,
-        defaultValue: 0,
-      },
       status: {
         type: Sequelize.ENUM("draft", "publish", "not publish"),
         defaultValue: "draft",
       },
     },
     {
-      tableName: "pejabat",
+      tableName: "post",
     }
   );
-  Pejabat.beforeUpdate(async (instance, options) => {
+  Post.beforeUpdate(async (instance, options) => {
     if (instance.changed("nama_file")) {
       instance.nama_file_updatedAt = new Date();
     }
   });
 
-  return Pejabat;
+  return Post;
 };
