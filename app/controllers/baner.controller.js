@@ -211,7 +211,7 @@ exports.update = async (req, res) => {
           message: "Error updating Baner with uuid=" + uuid,
         });
       } else {
-        if (data.nama_file !== null) {
+        if (data.nama_file != null) {
           var dir = data.nama_file.split("/");
           console.log("dir", dir);
           var path = `public/uploads/${dir[0]}/${dir[1]}`;
@@ -287,7 +287,7 @@ exports.delete = (req, res) => {
           message: "Error deleting Baner with uuid=" + uuid,
         });
       } else {
-        if (data.nama_file !== null) {
+        if (data.nama_file != null) {
           var dir = data.nama_file.split("/");
           var path = `public/uploads/${dir[0]}/${dir[1]}`;
           fs.rm(path, { recursive: true }, (err) => {
