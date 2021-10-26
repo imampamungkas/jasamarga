@@ -3,7 +3,6 @@ require("dotenv").config();
 const express = require("express");
 const paginate = require("express-paginate");
 const cors = require("cors");
-const bodyParser = require("body-parser");
 const path = require("path");
 
 const app = express();
@@ -29,8 +28,6 @@ app.use(express.json({ limit: "50mb" }));
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
-app.use(bodyParser.json({ limit: "50mb" }));
-app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 const db = require("./app/models");
 db.sequelize.sync();
 // db.sequelize.sync({ force: true }).then(() => {
@@ -58,6 +55,7 @@ require("./app/routes/baner.routes")(app);
 require("./app/routes/pejabat.routes")(app);
 require("./app/routes/penghargaan.routes")(app);
 require("./app/routes/dokumen.routes")(app);
+require("./app/routes/presskit.routes")(app);
 require("./app/routes/asean.routes")(app);
 require("./app/routes/kantor.routes")(app);
 require("./app/routes/kontak.routes")(app);

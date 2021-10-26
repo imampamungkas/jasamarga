@@ -4,6 +4,7 @@ module.exports = (app) => {
   const pejabat = require("../controllers/public/pejabat.controller.js");
   const penghargaan = require("../controllers/public/penghargaan.controller.js");
   const dokumen = require("../controllers/public/dokumen.controller.js");
+  const presskit = require("../controllers/public/presskit.controller.js");
   const asean = require("../controllers/public/asean.controller.js");
   const kantor = require("../controllers/public/kantor.controller.js");
   const post = require("../controllers/public/post.controller.js");
@@ -25,6 +26,11 @@ module.exports = (app) => {
   router.get("/penghargaan", penghargaan.findAll);
   // Retrieve penghargaan
   router.get("/penghargaan/:uuid", penghargaan.findOne);
+
+  // Retrieve all presskit
+  router.get("/presskit", presskit.findAll);
+  // Retrieve presskit
+  router.get("/presskit/:uuid", presskit.findOne);
 
   // Retrieve all dokumen
   router.get("/dokumen/:tipe", dokumen.findAll);

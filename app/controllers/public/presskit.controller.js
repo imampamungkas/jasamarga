@@ -10,20 +10,20 @@ exports.findAll = (req, res) => {
   const nopage = req.query.nopage || 0;
   const search = req.query.search;
   const tahun = req.query.tahun;
-  const tipe = req.params.tipe;
+  const tipe = req.query.tipe;
 
   var condition = {
     [Op.and]: [
       search
         ? {
           [Op.or]: [
+            { cover_file: { [Op.like]: `%${search}%` } },
             { presskit_file: { [Op.like]: `%${search}%` } },
           ],
         }
         : null,
       { status: "publish" },
-      tahun ? { tahun: tahun } : null,
-      { tipe: tipe },
+      tipe ? { tipe: tipe } : null,
     ],
   };
 
@@ -87,14 +87,12 @@ exports.findAll = (req, res) => {
 // Find a single Presskit with an id
 exports.findOne = (req, res) => {
   const uuid = req.params.uuid;
-  const tipe = req.params.tipe;
   const lang = req.query.lang || "id";
 
   Presskit.findOne({
     where: {
       [Op.and]: [
         { uuid: uuid },
-        { tipe: tipe },
         { status: "publish" },
       ]
     },
@@ -107,7 +105,7 @@ exports.findOne = (req, res) => {
     .then((data) => {
       if (data == null) {
         res.status(404).send({
-          message: `Error retrieving ${tipe} with uuid = ${uuid}`,
+          message: `Error retrieving Presskit with uuid = ${uuid}`,
         });
       } else {
         res.send(data);
@@ -115,7 +113,7 @@ exports.findOne = (req, res) => {
     })
     .catch((err) => {
       res.status(500).send({
-        message: `Error retrieving ${tipe} with uuid = ${uuid}`,
+        message: `Error retrieving Presskit with uuid = ${uuid}`,
       });
     });
 };
