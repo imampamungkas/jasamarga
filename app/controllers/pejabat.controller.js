@@ -233,9 +233,13 @@ exports.update = async (req, res) => {
         if (i18n instanceof Array && i18n.length > 0) {
           for (var i = 0; i < i18n.length; i++) {
             const { lang, ...trans } = i18n[i];
-            await PejabatI18n.update(trans, {
-              where: { [Op.and]: [{ pejabatUuid: uuid }, { lang: lang }] },
+            const [obj, created] = await PejabatI18n.findOrCreate({
+              where: { pejabatUuid: uuid, lang: lang },
+              defaults: trans
             });
+            if (!created) {
+              obj.update(trans);
+            }
           }
           await data.reload({ include: 'i18n' });
         }

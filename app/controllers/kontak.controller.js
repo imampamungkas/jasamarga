@@ -1,5 +1,4 @@
 const paginate = require("express-paginate");
-const fs = require("fs");
 const db = require("../models");
 const Kontak = db.kontak;
 const Op = db.Sequelize.Op;

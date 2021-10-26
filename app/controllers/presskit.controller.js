@@ -61,8 +61,6 @@ exports.create_form = async (req, res) => {
             value["presskitUuid"] = data.uuid;
             value["lang"] = key;
             await PresskitI18n.create(value);
-            console.log(key);
-            console.log(value);
           }
           await data.reload({ include: 'i18n' });
         }
@@ -275,7 +273,9 @@ exports.update_form = async (req, res) => {
                 where: { presskitUuid: uuid, lang: key },
                 defaults: value
               });
-              obj.update(value);
+              if(!created){
+                obj.update(value);
+              }
             }
             await data.reload({ include: 'i18n' });
           }
@@ -339,9 +339,13 @@ exports.update = async (req, res) => {
         if (i18n instanceof Array && i18n.length > 0) {
           for (var i = 0; i < i18n.length; i++) {
             const { lang, ...trans } = i18n[i];
-            await PresskitI18n.update(trans, {
-              where: { [Op.and]: [{ presskitUuid: uuid }, { lang: lang }] },
+            const [obj, created] = await PresskitI18n.findOrCreate({
+              where: { presskitUuid: uuid, lang: lang },
+              defaults: trans
             });
+            if(!created){
+              obj.update(trans);
+            }
           }
           await data.reload({ include: 'i18n' });
         }

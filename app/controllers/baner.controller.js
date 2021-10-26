@@ -226,9 +226,13 @@ exports.update = async (req, res) => {
         if (i18n instanceof Array && i18n.length > 0) {
           for (var i = 0; i < i18n.length; i++) {
             const { lang, ...trans } = i18n[i];
-            await BanerI18n.update(trans, {
-              where: { [Op.and]: [{ banerUuid: uuid }, { lang: lang }] },
+            const [obj, created] = await BanerI18n.findOrCreate({
+              where: { banerUuid: uuid, lang: lang },
+              defaults: trans
             });
+            if (!created) {
+              obj.update(trans);
+            }
           }
           await data.reload({ include: 'i18n' });
         }
