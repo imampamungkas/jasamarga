@@ -6,6 +6,8 @@ const Post = db.post;
 const PostI18n = db.postI18n;
 const Photo = db.photo;
 const PhotoI18n = db.photoI18n;
+const Info = db.info;
+const InfoI18n = db.infoI18n;
 const Op = db.Sequelize.Op;
 
 const { body } = require("express-validator");
@@ -53,6 +55,23 @@ exports.create = async (req, res) => {
         }
       });
       post["nama_file"] = `${timestamp}/${file_name}`;
+    }
+  }
+  if (req.body.hasOwnProperty("dokumen_file")) {
+    if (req.body.dokumen_file) {
+      var file_name = req.body.dokumen_file.nama;
+      const b = Buffer.from(req.body.dokumen_file.data, "base64");
+      const timestamp = `post-${tipe}/${new Date().getTime()}`;
+      var dir = `public/uploads/${timestamp}/`;
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      fs.writeFile(dir + file_name, b, function (err) {
+        if (!err) {
+          console.log("file is created", file_name);
+        }
+      });
+      post["dokumen_file"] = `${timestamp}/${file_name}`;
     }
   }
 
@@ -127,6 +146,14 @@ exports.findAll = (req, res) => {
               model: PhotoI18n,
               as: 'i18n',
             }],
+          },
+          {
+            model: Info,
+            as: 'info',
+            include: [{
+              model: InfoI18n,
+              as: 'i18n',
+            }],
           }
         ],
         order: [["updatedAt", "DESC"]],
@@ -144,6 +171,14 @@ exports.findAll = (req, res) => {
             as: 'photo',
             include: [{
               model: PhotoI18n,
+              as: 'i18n',
+            }],
+          },
+          {
+            model: Info,
+            as: 'info',
+            include: [{
+              model: InfoI18n,
               as: 'i18n',
             }],
           }
@@ -194,7 +229,14 @@ exports.findOne = (req, res) => {
           model: PhotoI18n,
           as: 'i18n',
         }],
-
+      },
+      {
+        model: Info,
+        as: 'info',
+        include: [{
+          model: InfoI18n,
+          as: 'i18n',
+        }],
       }
     ]
   })
@@ -240,6 +282,26 @@ exports.update = async (req, res) => {
       delete post.nama_file;
     }
   }
+
+  if (req.body.hasOwnProperty("dokumen_file")) {
+    if (req.body.dokumen_file) {
+      var file_name = req.body.dokumen_file.nama;
+      const b = Buffer.from(req.body.dokumen_file.data, "base64");
+      const timestamp = `post-${tipe}/${new Date().getTime()}`;
+      var dir = `public/uploads/${timestamp}/`;
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      fs.writeFile(dir + file_name, b, function (err) {
+        if (!err) {
+          console.log("file is created", file_name);
+        }
+      });
+      post["dokumen_file"] = `${timestamp}/${file_name}`;
+    } else {
+      delete post.dokumen_file;
+    }
+  }
   Post.findByPk(uuid)
     .then(async (data) => {
       if (data == null) {
@@ -249,6 +311,16 @@ exports.update = async (req, res) => {
       } else {
         if (data.nama_file != null) {
           var dir = data.nama_file.split("/");
+          console.log("dir", dir);
+          var path = `public/uploads/${dir[0]}/${dir[1]}`;
+          fs.rm(path, { recursive: true }, (err) => {
+            if (err) {
+              console.log("err : ", err);
+            }
+          });
+        }
+        if (data.dokumen_file != null) {
+          var dir = data.dokumen_file.split("/");
           console.log("dir", dir);
           var path = `public/uploads/${dir[0]}/${dir[1]}`;
           fs.rm(path, { recursive: true }, (err) => {
@@ -329,6 +401,15 @@ exports.delete = (req, res) => {
       } else {
         if (data.nama_file != null) {
           var dir = data.nama_file.split("/");
+          var path = `public/uploads/${dir[0]}/${dir[1]}`;
+          fs.rm(path, { recursive: true }, (err) => {
+            if (err) {
+              console.log("err : ", err);
+            }
+          });
+        }
+        if (data.dokumen_file != null) {
+          var dir = data.dokumen_file.split("/");
           var path = `public/uploads/${dir[0]}/${dir[1]}`;
           fs.rm(path, { recursive: true }, (err) => {
             if (err) {

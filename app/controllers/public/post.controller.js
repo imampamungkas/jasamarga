@@ -3,12 +3,17 @@ const paginate = require("express-paginate");
 const db = require("../../models");
 const Post = db.post;
 const PostI18n = db.postI18n;
+const Photo = db.photo;
+const PhotoI18n = db.photoI18n;
+const Info = db.info;
+const InfoI18n = db.infoI18n;
 const Op = db.Sequelize.Op;
 
 const use_publish = [
   'penghargaan',
   'press-release',
-  'program-incindental'
+  'program-incindental',
+  'pengumuman-pengadaan'
 ]
 exports.findAll = (req, res) => {
   const lang = req.query.lang || "id";
@@ -47,20 +52,56 @@ exports.findAll = (req, res) => {
     nopage == 1
       ? Post.findAll({
         where: condition,
-        include: {
-          model: PostI18n,
-          as: 'i18n',
-          where: condition_i18n,
-        },
+        include: [
+          {
+            model: PostI18n,
+            as: 'i18n',
+            where: condition_i18n,
+          },
+          {
+            model: Photo,
+            as: 'photo',
+            include: [{
+              model: PhotoI18n,
+              as: 'i18n',
+            }],
+          },
+          {
+            model: Info,
+            as: 'info',
+            include: [{
+              model: InfoI18n,
+              as: 'i18n',
+            }],
+          }
+        ],
         order: [["createdAt", "DESC"]],
       })
       : Post.findAndCountAll({
         where: condition,
-        include: {
-          model: PostI18n,
-          as: 'i18n',
-          where: condition_i18n,
-        },
+        include: [
+          {
+            model: PostI18n,
+            as: 'i18n',
+            where: condition_i18n,
+          },
+          {
+            model: Photo,
+            as: 'photo',
+            include: [{
+              model: PhotoI18n,
+              as: 'i18n',
+            }],
+          },
+          {
+            model: Info,
+            as: 'info',
+            include: [{
+              model: InfoI18n,
+              as: 'i18n',
+            }],
+          }
+        ],
         limit: req.query.limit,
         offset: req.skip,
         order: [["createdAt", "DESC"]],
@@ -101,11 +142,28 @@ exports.findOne = (req, res) => {
         use_publish.includes(tipe) ? { status: "publish" } : null,
       ]
     },
-    include: {
-      model: PostI18n,
-      as: 'i18n',
-      where: { '$i18n.lang$': lang },
-    },
+    include: [
+      {
+        model: PostI18n,
+        as: 'i18n',
+      },
+      {
+        model: Photo,
+        as: 'photo',
+        include: [{
+          model: PhotoI18n,
+          as: 'i18n',
+        }],
+      },
+      {
+        model: Info,
+        as: 'info',
+        include: [{
+          model: InfoI18n,
+          as: 'i18n',
+        }],
+      }
+    ],
   })
     .then((data) => {
       if (data == null) {

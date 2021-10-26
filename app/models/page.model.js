@@ -17,11 +17,6 @@ module.exports = (sequelize, Sequelize) => {
       nama_file: {
         type: Sequelize.STRING,
       },
-      nama_file_updatedAt: {
-        type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.NOW,
-      },
       nama_file_url: {
         type: Sequelize.VIRTUAL,
         get() {
@@ -38,11 +33,6 @@ module.exports = (sequelize, Sequelize) => {
       tableName: "page",
     }
   );
-  Page.beforeUpdate(async (instance, options) => {
-    if (instance.changed("nama_file")) {
-      instance.nama_file_updatedAt = new Date();
-    }
-  });
 
   return Page;
 };

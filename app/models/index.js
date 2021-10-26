@@ -40,6 +40,8 @@ db.post = require("./post.model.js")(sequelize, Sequelize);
 db.postI18n = require("./post-i18n.model.js")(sequelize, Sequelize);
 db.photo = require("./photo.model.js")(sequelize, Sequelize);
 db.photoI18n = require("./photo-i18n.model.js")(sequelize, Sequelize);
+db.info = require("./info.model.js")(sequelize, Sequelize);
+db.infoI18n = require("./info-i18n.model.js")(sequelize, Sequelize);
 db.dokumen = require("./dokumen.model.js")(sequelize, Sequelize);
 db.dokumenI18n = require("./dokumen-i18n.model.js")(sequelize, Sequelize);
 db.presskit = require("./presskit.model.js")(sequelize, Sequelize);
@@ -67,6 +69,15 @@ db.post.hasMany(db.photo, {
   onUpdate: "CASCADE",
 });
 db.photo.belongsTo(db.post, {
+  as: "post",
+});
+
+db.post.hasMany(db.info, {
+  as: "info",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+db.info.belongsTo(db.post, {
   as: "post",
 });
 
@@ -150,6 +161,15 @@ db.photo.hasMany(db.photoI18n, {
 });
 db.photoI18n.belongsTo(db.photo, {
   as: "photo",
+});
+
+db.info.hasMany(db.infoI18n, {
+  as: "i18n",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+db.infoI18n.belongsTo(db.info, {
+  as: "info",
 });
 
 db.dokumen.hasMany(db.dokumenI18n, {
