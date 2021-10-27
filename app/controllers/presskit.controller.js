@@ -325,7 +325,7 @@ exports.update = async (req, res) => {
           message: "Error updating Presskit with uuid=" + uuid,
         });
       } else {
-        if (data.presskit_file != null) {
+        if (presskit.presskit_file != null) {
           var dir = data.presskit_file.split("/");
           var path = `public/uploads/${dir[0]}/${dir[1]}`;
           fs.rm(path, { recursive: true }, (err) => {

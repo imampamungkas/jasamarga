@@ -259,7 +259,7 @@ exports.update = async (req, res) => {
           message: "Error updating Dokumen with uuid=" + uuid,
         });
       } else {
-        if (data.cover_file != null) {
+        if (dokumen.cover_file != null) {
           var dir = data.cover_file.split("/");
           console.log("dir", dir);
           var path = `public/uploads/${dir[0]}/${dir[1]}`;
@@ -269,7 +269,7 @@ exports.update = async (req, res) => {
             }
           });
         }
-        if (data.dokumen_file != null) {
+        if (dokumen.dokumen_file != null) {
           var dir = data.dokumen_file.split("/");
           console.log("dir", dir);
           var path = `public/uploads/${dir[0]}/${dir[1]}`;

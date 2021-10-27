@@ -206,7 +206,7 @@ exports.update = async (req, res) => {
           message: "Error updating Penghargaan with uuid=" + uuid,
         });
       } else {
-        if (data.nama_file != null) {
+        if (penghargaan.nama_file != null) {
           var dir = data.nama_file.split("/");
           console.log("dir", dir);
           path = `public/uploads/${dir[0]}/${dir[1]}`;

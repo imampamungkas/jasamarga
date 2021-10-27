@@ -89,7 +89,7 @@ exports.update = async (req, res) => {
         }
       }
       if (!created) {
-        if (data.nama_file != null) {
+        if (page.nama_file != null) {
           console.log("data.nama_file", data.nama_file);
           var dir = data.nama_file.split("/");
           console.log("dir", dir);
