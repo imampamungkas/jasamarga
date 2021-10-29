@@ -14,7 +14,8 @@ const use_publish = [
   'press-release',
   'program-incindental',
   'pengumuman-pengadaan'
-]
+];
+
 exports.findAll = (req, res) => {
   const lang = req.query.lang || "id";
   const nopage = req.query.nopage || 0;

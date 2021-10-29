@@ -1,9 +1,18 @@
 //@ts-check
 const paginate = require("express-paginate");
 const db = require("../../models");
-const Presskit = db.presskit;
-const PresskitI18n = db.presskitI18n;
+const Dokumen = db.dokumen;
+const DokumenI18n = db.dokumenI18n;
 const Op = db.Sequelize.Op;
+
+const use_publish = [
+  'dokumen-tata-kelola',
+  'laporan-gcg',
+  'laporan-berkelanjutan',
+  'buletin',
+  'photoboard',
+  'magazine'
+];
 
 exports.findAll = (req, res) => {
   const lang = req.query.lang || "id";
@@ -17,11 +26,11 @@ exports.findAll = (req, res) => {
       search
         ? {
           [Op.or]: [
-            { presskit_file: { [Op.like]: `%${search}%` } },
+            { dokumen_file: { [Op.like]: `%${search}%` } },
           ],
         }
         : null,
-      { status: "publish" },
+      use_publish.includes(tipe) ? { status: "publish" } : null,
       tahun ? { tahun: tahun } : null,
       { tipe: tipe },
     ],
@@ -42,19 +51,19 @@ exports.findAll = (req, res) => {
   };
   var query =
     nopage == 1
-      ? Presskit.findAll({
+      ? Dokumen.findAll({
         where: condition,
         include: {
-          model: PresskitI18n,
+          model: DokumenI18n,
           as: 'i18n',
           where: condition_i18n,
         },
         order: [["createdAt", "DESC"]],
       })
-      : Presskit.findAndCountAll({
+      : Dokumen.findAndCountAll({
         where: condition,
         include: {
-          model: PresskitI18n,
+          model: DokumenI18n,
           as: 'i18n',
           where: condition_i18n,
         },
@@ -84,22 +93,22 @@ exports.findAll = (req, res) => {
     });
 };
 
-// Find a single Presskit with an id
+// Find a single Dokumen with an id
 exports.findOne = (req, res) => {
   const uuid = req.params.uuid;
   const tipe = req.params.tipe;
   const lang = req.query.lang || "id";
 
-  Presskit.findOne({
+  Dokumen.findOne({
     where: {
       [Op.and]: [
         { uuid: uuid },
         { tipe: tipe },
-        { status: "publish" },
+        use_publish.includes(tipe) ? { status: "publish" } : null,
       ]
     },
     include: {
-      model: PresskitI18n,
+      model: DokumenI18n,
       as: 'i18n',
       where: { '$i18n.lang$': lang },
     },
