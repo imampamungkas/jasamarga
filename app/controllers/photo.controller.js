@@ -106,7 +106,7 @@ exports.update = async (req, res) => {
           message: "Error updating Photo with uuid=" + uuid,
         });
       } else {
-        if (photo.nama_file != null) {
+        if (photo.nama_file != null && data.nama_file != null) {
           var dir = data.nama_file.split("/");
           console.log("dir", dir);
           var path = `public/uploads/${dir[0]}/${dir[1]}`;

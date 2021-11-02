@@ -253,7 +253,7 @@ exports.update_form = async (req, res) => {
           });
         } else {
           if (req.file != null) {
-            if (data.presskit_file != null) {
+            if (data.presskit_file != null && data.presskit_file != null) {
               var dir = data.presskit_file.split("/");
               console.log("dir", dir);
               const rm_path = `public/uploads/${dir[0]}/${dir[1]}`;
@@ -325,7 +325,7 @@ exports.update = async (req, res) => {
           message: "Error updating Presskit with uuid=" + uuid,
         });
       } else {
-        if (presskit.presskit_file != null) {
+        if (presskit.presskit_file != null && data.presskit_file != null) {
           var dir = data.presskit_file.split("/");
           var path = `public/uploads/${dir[0]}/${dir[1]}`;
           fs.rm(path, { recursive: true }, (err) => {

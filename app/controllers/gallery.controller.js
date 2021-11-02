@@ -105,7 +105,7 @@ exports.update = async (req, res) => {
           message: "Error updating Gallery with uuid=" + uuid,
         });
       } else {
-        if (gallery.nama_file != null) {
+        if (gallery.nama_file != null && data.nama_file != null) {
           var dir = data.nama_file.split("/");
           console.log("dir", dir);
           var path = `public/uploads/${dir[0]}/${dir[1]}`;
