@@ -46,6 +46,7 @@ db.dokumen = require("./dokumen.model.js")(sequelize, Sequelize);
 db.dokumenI18n = require("./dokumen-i18n.model.js")(sequelize, Sequelize);
 db.presskit = require("./presskit.model.js")(sequelize, Sequelize);
 db.presskitI18n = require("./presskit-i18n.model.js")(sequelize, Sequelize);
+db.travoy = require("./travoy.model.js")(sequelize, Sequelize);
 
 db.users.hasMany(db.tokens, { as: "tokens" });
 db.users.hasMany(db.refresTokens, { as: "refresTokens" });
