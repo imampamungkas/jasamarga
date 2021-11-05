@@ -1,10 +1,13 @@
 //@ts-check
 const db = require("../models");
+const Op = db.Sequelize.Op;
 const Info = db.info;
 const InfoI18n = db.infoI18n;
 
 const { body } = require("express-validator");
 const { validationResult } = require("express-validator");
+const regexExpUuid = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi;
+
 
 exports.validate = (method) => {
   switch (method) {
@@ -32,7 +35,11 @@ exports.create = async (req, res) => {
   }
 
   const { i18n, ...info } = req.body;
-  info["postUuid"] = postUuid;
+  if (regexExpUuid.test(postUuid)) {
+    info["postUuid"] = postUuid;
+  } else {
+    info["pageSlug"] = postUuid;
+  }
 
   // Save Info in the database
   Info.create(info)
@@ -61,7 +68,11 @@ exports.update = async (req, res) => {
   const uuid = req.params.uuid;
 
   const { i18n, ...info } = req.body;
-  info["postUuid"] = postUuid;
+  if (regexExpUuid.test(postUuid)) {
+    info["postUuid"] = postUuid;
+  } else {
+    info["pageSlug"] = postUuid;
+  }
   Info.findByPk(uuid)
     .then(async (data) => {
       if (data == null) {
@@ -159,7 +170,12 @@ exports.delete = (req, res) => {
 exports.deleteAll = (req, res) => {
   const postUuid = req.params.postUuid;
   Info.destroy({
-    where: { postUuid: postUuid },
+    where: {
+      [Op.or]: [
+        { postUuid: postUuid },
+        { pageSlug: postUuid },
+      ],
+    },
     truncate: false,
   })
     .then((nums) => {

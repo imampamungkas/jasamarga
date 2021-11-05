@@ -82,6 +82,15 @@ db.info.belongsTo(db.post, {
   as: "post",
 });
 
+db.page.hasMany(db.info, {
+  as: "info",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+db.info.belongsTo(db.page, {
+  as: "page",
+});
+
 // i18n relation
 db.pejabat.hasMany(db.pejabatI18n, {
   as: "i18n",

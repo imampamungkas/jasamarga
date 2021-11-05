@@ -5,7 +5,13 @@ const Page = db.page;
 const PageI18n = db.pageI18n;
 const Gallery = db.gallery;
 const GalleryI18n = db.galleryI18n;
+const Info = db.info;
+const InfoI18n = db.infoI18n;
 
+
+const use_info = [
+  'tata-nilai',
+];
 // Find a single Page with an slug
 exports.findOne = (req, res) => {
   const slug = req.params.slug;
@@ -24,9 +30,18 @@ exports.findOne = (req, res) => {
           model: GalleryI18n,
           as: 'i18n',
         }],
-
-      }
-    ]
+      },
+      use_info.includes(slug) ? {
+        model: Info,
+        as: 'info',
+        include: [{
+          model: InfoI18n,
+          as: 'i18n',
+        }],
+      } : null,
+    ].filter(function (el) {
+      return el != null;
+    })
   })
     .then((data) => {
       if (data == null) {

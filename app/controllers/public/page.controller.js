@@ -4,6 +4,12 @@ const Page = db.page;
 const PageI18n = db.pageI18n;
 const Gallery = db.gallery;
 const GalleryI18n = db.galleryI18n;
+const Info = db.info;
+const InfoI18n = db.infoI18n;
+
+const use_info = [
+  'tata-nilai',
+];
 
 // Find a single Page with an id
 exports.findOne = (req, res) => {
@@ -26,9 +32,19 @@ exports.findOne = (req, res) => {
           as: 'i18n',
           where: { '$gallery->i18n.lang$': lang },
         }],
-
-      }
-    ]
+      },
+      use_info.includes(slug) ? {
+        model: Info,
+        as: 'info',
+        include: [{
+          model: InfoI18n,
+          as: 'i18n',
+          where: { '$info->i18n.lang$': lang },
+        }],
+      } : null,
+    ].filter(function (el) {
+      return el != null;
+    })
   })
     .then((data) => {
       if (data == null) {
