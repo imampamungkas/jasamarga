@@ -65,6 +65,7 @@ exports.findAll = (req, res) => {
             include: [{
               model: PhotoI18n,
               as: 'i18n',
+              where: { '$photo->i18n.lang$': lang },
             }],
           },
           {
@@ -73,6 +74,7 @@ exports.findAll = (req, res) => {
             include: [{
               model: InfoI18n,
               as: 'i18n',
+              where: { '$info->i18n.lang$': lang },
             }],
           }
         ],
@@ -92,6 +94,7 @@ exports.findAll = (req, res) => {
             include: [{
               model: PhotoI18n,
               as: 'i18n',
+              where: { '$photo->i18n.lang$': lang },
             }],
           },
           {
@@ -100,6 +103,7 @@ exports.findAll = (req, res) => {
             include: [{
               model: InfoI18n,
               as: 'i18n',
+              where: { '$info->i18n.lang$': lang },
             }],
           }
         ],
@@ -134,19 +138,17 @@ exports.findOne = (req, res) => {
   const uuid = req.params.uuid;
   const tipe = req.params.tipe;
   const lang = req.query.lang || "id";
-
+  var condition = { uuid: uuid, tipe: tipe };
+  if (use_publish.includes(tipe)) {
+    condition["status"] = "publish";
+  }
   Post.findOne({
-    where: {
-      [Op.and]: [
-        { uuid: uuid },
-        { tipe: tipe },
-        use_publish.includes(tipe) ? { status: "publish" } : null,
-      ]
-    },
+    where: condition,
     include: [
       {
         model: PostI18n,
         as: 'i18n',
+        where: { '$i18n.lang$': lang },
       },
       {
         model: Photo,
@@ -154,6 +156,7 @@ exports.findOne = (req, res) => {
         include: [{
           model: PhotoI18n,
           as: 'i18n',
+          where: { '$photo->i18n.lang$': lang },
         }],
       },
       {
@@ -162,6 +165,7 @@ exports.findOne = (req, res) => {
         include: [{
           model: InfoI18n,
           as: 'i18n',
+          where: { '$info->i18n.lang$': lang },
         }],
       }
     ],
@@ -176,6 +180,7 @@ exports.findOne = (req, res) => {
       }
     })
     .catch((err) => {
+      console.log(err);
       res.status(500).send({
         message: `Error retrieving ${tipe} with uuid = ${uuid}`,
       });
