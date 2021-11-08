@@ -43,6 +43,10 @@ module.exports = (sequelize, Sequelize) => {
           throw new Error("Do not try to set the `dokumen_file_url` value!");
         },
       },
+      urutan: {
+        type: Sequelize.INTEGER,
+        defaultValue: 0,
+      },
       status: {
         type: Sequelize.ENUM("draft", "publish", "not publish"),
         defaultValue: "draft",
