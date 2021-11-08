@@ -35,6 +35,7 @@ exports.findAll = (req, res) => {
           ],
         }
         : null,
+      { '$i18n.lang$': lang },
     ],
   };
   var query =
@@ -45,11 +46,11 @@ exports.findAll = (req, res) => {
           model: AseanI18n,
           as: 'i18n',
           where: condition_i18n,
-          order: [
-            ["grup", "ASC"],
-            ["no_ref", "ASC"],
-          ],
         },
+        order: [
+          [{ model: AseanI18n, as: 'i18n' }, 'grup', 'asc'],
+          [{ model: AseanI18n, as: 'i18n' }, 'no_ref', 'asc']
+        ],
       })
       : Asean.findAndCountAll({
         where: condition,
@@ -57,10 +58,6 @@ exports.findAll = (req, res) => {
           model: AseanI18n,
           as: 'i18n',
           where: condition_i18n,
-          order: [
-            ["grup", "ASC"],
-            ["no_ref", "ASC"],
-          ],
         },
         limit: req.query.limit,
         offset: req.skip,
@@ -81,6 +78,7 @@ exports.findAll = (req, res) => {
       }
     })
     .catch((err) => {
+      console.log(err);
       res.status(500).send({
         message: err.message || "Some error occurred while retrieving users.",
       });

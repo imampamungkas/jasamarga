@@ -1,4 +1,5 @@
 const paginate = require("express-paginate");
+const fs = require("fs");
 const db = require("../models");
 const Asean = db.asean;
 const AseanI18n = db.aseanI18n;
@@ -35,6 +36,23 @@ exports.create = async (req, res) => {
   }
 
   const { i18n, ...asean } = req.body;
+  if (req.body.hasOwnProperty("nama_file")) {
+    if (req.body.nama_file) {
+      var file_name = req.body.nama_file.nama;
+      const b = Buffer.from(req.body.nama_file.data, "base64");
+      const timestamp = `asean/${new Date().getTime()}`;
+      var dir = `public/uploads/${timestamp}/`;
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      fs.writeFile(dir + file_name, b, function (err) {
+        if (!err) {
+          console.log("file is created", file_name);
+        }
+      });
+      asean["nama_file"] = `${timestamp}/${file_name}`;
+    }
+  }
 
   // Save Asean in the database
   Asean.create(asean)
@@ -66,6 +84,7 @@ exports.findAll = (req, res) => {
         ? {
           [Op.or]: [
             { sumber_link: { [Op.like]: `%${search}%` } },
+            { nama_file: { [Op.like]: `%${search}%` } },
           ],
         }
         : null,
@@ -96,11 +115,11 @@ exports.findAll = (req, res) => {
           model: AseanI18n,
           as: 'i18n',
           where: condition_i18n,
-          order: [
-            ["grup", "ASC"],
-            ["no_ref", "ASC"],
-          ],
         },
+        order: [
+          [{ model: AseanI18n, as: 'i18n' }, 'grup', 'asc'],
+          [{ model: AseanI18n, as: 'i18n' }, 'no_ref', 'asc']
+        ],
       })
       : Asean.findAndCountAll({
         where: condition,
@@ -108,10 +127,6 @@ exports.findAll = (req, res) => {
           model: AseanI18n,
           as: 'i18n',
           where: condition_i18n,
-          order: [
-            ["grup", "ASC"],
-            ["no_ref", "ASC"],
-          ],
         },
         limit: req.query.limit,
         offset: req.skip,
@@ -166,6 +181,25 @@ exports.findOne = (req, res) => {
 exports.update = async (req, res) => {
   const uuid = req.params.uuid;
   const { i18n, ...asean } = req.body;
+  if (req.body.hasOwnProperty("nama_file")) {
+    if (req.body.nama_file) {
+      var file_name = req.body.nama_file.nama;
+      const b = Buffer.from(req.body.nama_file.data, "base64");
+      const timestamp = `asean/${new Date().getTime()}`;
+      var dir = `public/uploads/${timestamp}/`;
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      fs.writeFile(dir + file_name, b, function (err) {
+        if (!err) {
+          console.log("file is created", file_name);
+        }
+      });
+      asean["nama_file"] = `${timestamp}/${file_name}`;
+    } else {
+      delete asean.nama_file;
+    }
+  }
   Asean.findByPk(uuid)
     .then(async (data) => {
       if (data == null) {
@@ -173,6 +207,16 @@ exports.update = async (req, res) => {
           message: "Error updating Asean with uuid=" + uuid,
         });
       } else {
+        if (asean.nama_file != null && data.nama_file != null) {
+          var dir = data.nama_file.split("/");
+          console.log("dir", dir);
+          var path = `public/uploads/${dir[0]}/${dir[1]}`;
+          fs.rm(path, { recursive: true }, (err) => {
+            if (err) {
+              console.log("err : ", err);
+            }
+          });
+        }
         data.update(asean);
         if (i18n instanceof Array && i18n.length > 0) {
           for (var i = 0; i < i18n.length; i++) {
@@ -212,6 +256,15 @@ exports.delete = (req, res) => {
           message: "Error deleting Asean with uuid=" + uuid,
         });
       } else {
+        if (data.nama_file != null) {
+          var dir = data.nama_file.split("/");
+          var path = `public/uploads/${dir[0]}/${dir[1]}`;
+          fs.rm(path, { recursive: true }, (err) => {
+            if (err) {
+              console.log("err : ", err);
+            }
+          });
+        }
         data.destroy();
         res.send({
           message: "Asean was deleted successfully.",
