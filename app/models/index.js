@@ -44,6 +44,8 @@ db.info = require("./info.model.js")(sequelize, Sequelize);
 db.infoI18n = require("./info-i18n.model.js")(sequelize, Sequelize);
 db.tcd = require("./tcd.model.js")(sequelize, Sequelize);
 db.tcdI18n = require("./tcd-i18n.model.js")(sequelize, Sequelize);
+db.restArea = require("./rest_area.model")(sequelize, Sequelize);
+db.restAreaI18n = require("./rest_area-i18n.model")(sequelize, Sequelize);
 db.statusTol = require("./status_tol.model.js")(sequelize, Sequelize);
 db.statusTolI18n = require("./status_tol-i18n.model.js")(sequelize, Sequelize);
 db.dokumen = require("./dokumen.model.js")(sequelize, Sequelize);
@@ -110,6 +112,15 @@ db.page.hasMany(db.tcd, {
   onUpdate: "CASCADE",
 });
 db.tcd.belongsTo(db.page, {
+  as: "page",
+});
+
+db.page.hasMany(db.restArea, {
+  as: "rest_area",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+db.restArea.belongsTo(db.page, {
   as: "page",
 });
 
@@ -211,6 +222,15 @@ db.tcd.hasMany(db.tcdI18n, {
 });
 db.tcdI18n.belongsTo(db.tcd, {
   as: "tcd",
+});
+
+db.restArea.hasMany(db.restAreaI18n, {
+  as: "i18n",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+db.restAreaI18n.belongsTo(db.restArea, {
+  as: "rest_area",
 });
 
 db.statusTol.hasMany(db.statusTolI18n, {

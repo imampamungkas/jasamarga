@@ -9,6 +9,8 @@ const Info = db.info;
 const InfoI18n = db.infoI18n;
 const Tcd = db.tcd;
 const TcdI18n = db.tcdI18n;
+const RestArea = db.restArea;
+const RestAreaI18n = db.restAreaI18n;
 
 
 const use_info = [
@@ -16,6 +18,9 @@ const use_info = [
 ];
 const use_tcd = [
   'tcd',
+];
+const use_rest_area = [
+  'rest-area',
 ];
 // Find a single Page with an slug
 exports.findOne = (req, res) => {
@@ -49,6 +54,14 @@ exports.findOne = (req, res) => {
         as: 'tcd',
         include: [{
           model: TcdI18n,
+          as: 'i18n',
+        }],
+      } : null,
+      use_rest_area.includes(slug) ? {
+        model: RestArea,
+        as: 'rest_area',
+        include: [{
+          model: RestAreaI18n,
           as: 'i18n',
         }],
       } : null,
