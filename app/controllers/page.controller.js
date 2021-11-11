@@ -11,10 +11,16 @@ const Tcd = db.tcd;
 const TcdI18n = db.tcdI18n;
 const RestArea = db.restArea;
 const RestAreaI18n = db.restAreaI18n;
+const Residential = db.residential;
+const ResidentialI18n = db.residentialI18n;
+const use_residential = [
+  'residential',
+];
 
 
 const use_info = [
   'tata-nilai',
+  'bisnis-lainnya'
 ];
 const use_tcd = [
   'tcd',
@@ -62,6 +68,14 @@ exports.findOne = (req, res) => {
         as: 'rest_area',
         include: [{
           model: RestAreaI18n,
+          as: 'i18n',
+        }],
+      } : null,
+      use_residential.includes(slug) ? {
+        model: Residential,
+        as: 'residential',
+        include: [{
+          model: ResidentialI18n,
           as: 'i18n',
         }],
       } : null,

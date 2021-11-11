@@ -10,9 +10,12 @@ const Tcd = db.tcd;
 const TcdI18n = db.tcdI18n;
 const RestArea = db.restArea;
 const RestAreaI18n = db.restAreaI18n;
+const Residential = db.residential;
+const ResidentialI18n = db.residentialI18n;
 
 const use_info = [
   'tata-nilai',
+  'bisnis-lainnya'
 ];
 
 const use_tcd = [
@@ -20,6 +23,9 @@ const use_tcd = [
 ];
 const use_rest_area = [
   'rest-area',
+];
+const use_residential = [
+  'residential',
 ];
 // Find a single Page with an id
 exports.findOne = (req, res) => {
@@ -67,6 +73,16 @@ exports.findOne = (req, res) => {
         include: [{
           model: RestAreaI18n,
           as: 'i18n',
+          where: { '$rest_area->i18n.lang$': lang },
+        }],
+      } : null,
+      use_residential.includes(slug) ? {
+        model: Residential,
+        as: 'residential',
+        include: [{
+          model: ResidentialI18n,
+          as: 'i18n',
+          where: { '$residential->i18n.lang$': lang },
         }],
       } : null,
     ].filter(function (el) {
