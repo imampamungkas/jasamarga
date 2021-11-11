@@ -7,10 +7,15 @@ const Gallery = db.gallery;
 const GalleryI18n = db.galleryI18n;
 const Info = db.info;
 const InfoI18n = db.infoI18n;
+const Tcd = db.tcd;
+const TcdI18n = db.tcdI18n;
 
 
 const use_info = [
   'tata-nilai',
+];
+const use_tcd = [
+  'tcd',
 ];
 // Find a single Page with an slug
 exports.findOne = (req, res) => {
@@ -36,6 +41,14 @@ exports.findOne = (req, res) => {
         as: 'info',
         include: [{
           model: InfoI18n,
+          as: 'i18n',
+        }],
+      } : null,
+      use_tcd.includes(slug) ? {
+        model: Tcd,
+        as: 'tcd',
+        include: [{
+          model: TcdI18n,
           as: 'i18n',
         }],
       } : null,

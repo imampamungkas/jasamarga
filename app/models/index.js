@@ -42,6 +42,8 @@ db.photo = require("./photo.model.js")(sequelize, Sequelize);
 db.photoI18n = require("./photo-i18n.model.js")(sequelize, Sequelize);
 db.info = require("./info.model.js")(sequelize, Sequelize);
 db.infoI18n = require("./info-i18n.model.js")(sequelize, Sequelize);
+db.tcd = require("./tcd.model.js")(sequelize, Sequelize);
+db.tcdI18n = require("./tcd-i18n.model.js")(sequelize, Sequelize);
 db.statusTol = require("./status_tol.model.js")(sequelize, Sequelize);
 db.statusTolI18n = require("./status_tol-i18n.model.js")(sequelize, Sequelize);
 db.dokumen = require("./dokumen.model.js")(sequelize, Sequelize);
@@ -99,6 +101,15 @@ db.page.hasMany(db.info, {
   onUpdate: "CASCADE",
 });
 db.info.belongsTo(db.page, {
+  as: "page",
+});
+
+db.page.hasMany(db.tcd, {
+  as: "tcd",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+db.tcd.belongsTo(db.page, {
   as: "page",
 });
 
@@ -191,6 +202,15 @@ db.info.hasMany(db.infoI18n, {
 });
 db.infoI18n.belongsTo(db.info, {
   as: "info",
+});
+
+db.tcd.hasMany(db.tcdI18n, {
+  as: "i18n",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+db.tcdI18n.belongsTo(db.tcd, {
+  as: "tcd",
 });
 
 db.statusTol.hasMany(db.statusTolI18n, {
