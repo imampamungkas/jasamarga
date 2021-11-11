@@ -8,6 +8,8 @@ const Photo = db.photo;
 const PhotoI18n = db.photoI18n;
 const Info = db.info;
 const InfoI18n = db.infoI18n;
+const StatusTol = db.statusTol;
+const StatusTolI18n = db.statusTolI18n;
 const Op = db.Sequelize.Op;
 
 const { body } = require("express-validator");
@@ -27,6 +29,11 @@ exports.validate = (method) => {
     }
   }
 };
+
+const use_status_tol = [
+  'ruas-jalan-bisnis-konsesi',
+  'daftar-ruas-tol-dalam-tahap-konstruksi'
+];
 // Create and Save a new Post
 exports.create = async (req, res) => {
   const tipe = req.params.tipe;
@@ -154,8 +161,18 @@ exports.findAll = (req, res) => {
               model: InfoI18n,
               as: 'i18n',
             }],
-          }
-        ],
+          },
+          use_status_tol.includes(tipe) ? {
+            model: StatusTol,
+            as: 'status_tol',
+            include: [{
+              model: StatusTolI18n,
+              as: 'i18n',
+            }],
+          } : null,
+        ].filter(function (el) {
+          return el != null;
+        }),
         order: [["updatedAt", "DESC"]],
       })
       : Post.findAndCountAll({
@@ -181,8 +198,18 @@ exports.findAll = (req, res) => {
               model: InfoI18n,
               as: 'i18n',
             }],
-          }
-        ],
+          },
+          use_status_tol.includes(tipe) ? {
+            model: StatusTol,
+            as: 'status_tol',
+            include: [{
+              model: StatusTolI18n,
+              as: 'i18n',
+            }],
+          } : null,
+        ].filter(function (el) {
+          return el != null;
+        }),
         limit: req.query.limit,
         offset: req.skip,
         order: [["updatedAt", "DESC"]],
@@ -237,8 +264,18 @@ exports.findOne = (req, res) => {
           model: InfoI18n,
           as: 'i18n',
         }],
-      }
-    ]
+      },
+      use_status_tol.includes(tipe) ? {
+        model: StatusTol,
+        as: 'status_tol',
+        include: [{
+          model: StatusTolI18n,
+          as: 'i18n',
+        }],
+      } : null,
+    ].filter(function (el) {
+      return el != null;
+    })
   })
     .then((data) => {
       if (data == null) {

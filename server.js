@@ -64,6 +64,7 @@ require("./app/routes/gallery.routes")(app);
 require("./app/routes/post.routes")(app);
 require("./app/routes/photo.routes")(app);
 require("./app/routes/info.routes")(app);
+require("./app/routes/status_tol.routes")(app);
 var upload = require("./upload.js");
 app.post("/upload", upload);
 

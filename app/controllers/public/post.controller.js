@@ -7,6 +7,8 @@ const Photo = db.photo;
 const PhotoI18n = db.photoI18n;
 const Info = db.info;
 const InfoI18n = db.infoI18n;
+const StatusTol = db.statusTol;
+const StatusTolI18n = db.statusTolI18n;
 const Op = db.Sequelize.Op;
 
 const use_publish = [
@@ -14,6 +16,12 @@ const use_publish = [
   'press-release',
   'program-incindental',
   'pengumuman-pengadaan'
+];
+
+
+const use_status_tol = [
+  'ruas-jalan-bisnis-konsesi',
+  'daftar-ruas-tol-dalam-tahap-konstruksi'
 ];
 
 exports.findAll = (req, res) => {
@@ -76,8 +84,19 @@ exports.findAll = (req, res) => {
               as: 'i18n',
               where: { '$info->i18n.lang$': lang },
             }],
-          }
-        ],
+          },
+          use_status_tol.includes(tipe) ? {
+            model: StatusTol,
+            as: 'status_tol',
+            include: [{
+              model: StatusTolI18n,
+              as: 'i18n',
+              where: { '$status_tol->i18n.lang$': lang },
+            }],
+          } : null,
+        ].filter(function (el) {
+          return el != null;
+        }),
         order: [["createdAt", "DESC"]],
       })
       : Post.findAndCountAll({
@@ -105,8 +124,19 @@ exports.findAll = (req, res) => {
               as: 'i18n',
               where: { '$info->i18n.lang$': lang },
             }],
-          }
-        ],
+          },
+          use_status_tol.includes(tipe) ? {
+            model: StatusTol,
+            as: 'status_tol',
+            include: [{
+              model: StatusTolI18n,
+              as: 'i18n',
+              where: { '$status_tol->i18n.lang$': lang },
+            }],
+          } : null,
+        ].filter(function (el) {
+          return el != null;
+        }),
         limit: req.query.limit,
         offset: req.skip,
         order: [["createdAt", "DESC"]],
@@ -167,8 +197,19 @@ exports.findOne = (req, res) => {
           as: 'i18n',
           where: { '$info->i18n.lang$': lang },
         }],
-      }
-    ],
+      },
+      use_status_tol.includes(tipe) ? {
+        model: StatusTol,
+        as: 'status_tol',
+        include: [{
+          model: StatusTolI18n,
+          as: 'i18n',
+          where: { '$status_tol->i18n.lang$': lang },
+        }],
+      } : null,
+    ].filter(function (el) {
+      return el != null;
+    }),
   })
     .then((data) => {
       if (data == null) {

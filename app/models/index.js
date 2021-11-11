@@ -42,6 +42,8 @@ db.photo = require("./photo.model.js")(sequelize, Sequelize);
 db.photoI18n = require("./photo-i18n.model.js")(sequelize, Sequelize);
 db.info = require("./info.model.js")(sequelize, Sequelize);
 db.infoI18n = require("./info-i18n.model.js")(sequelize, Sequelize);
+db.statusTol = require("./status_tol.model.js")(sequelize, Sequelize);
+db.statusTolI18n = require("./status_tol-i18n.model.js")(sequelize, Sequelize);
 db.dokumen = require("./dokumen.model.js")(sequelize, Sequelize);
 db.dokumenI18n = require("./dokumen-i18n.model.js")(sequelize, Sequelize);
 db.presskit = require("./presskit.model.js")(sequelize, Sequelize);
@@ -79,6 +81,15 @@ db.post.hasMany(db.info, {
   onUpdate: "CASCADE",
 });
 db.info.belongsTo(db.post, {
+  as: "post",
+});
+
+db.post.hasMany(db.statusTol, {
+  as: "status_tol",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+db.statusTol.belongsTo(db.post, {
   as: "post",
 });
 
@@ -180,6 +191,15 @@ db.info.hasMany(db.infoI18n, {
 });
 db.infoI18n.belongsTo(db.info, {
   as: "info",
+});
+
+db.statusTol.hasMany(db.statusTolI18n, {
+  as: "i18n",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+db.statusTolI18n.belongsTo(db.statusTol, {
+  as: "status_tol",
 });
 
 db.dokumen.hasMany(db.dokumenI18n, {
