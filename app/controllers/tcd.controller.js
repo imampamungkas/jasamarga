@@ -1,8 +1,8 @@
 //@ts-check
 const db = require("../models");
 const Op = db.Sequelize.Op;
-const Info = db.tcd;
-const InfoI18n = db.tcdI18n;
+const Tcd = db.tcd;
+const TcdI18n = db.tcdI18n;
 
 const { body } = require("express-validator");
 const { validationResult } = require("express-validator");
@@ -11,19 +11,19 @@ const regexExpUuid = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-
 
 exports.validate = (method) => {
   switch (method) {
-    case "createInfo": {
+    case "createTcd": {
       return [
         // body("nama").exists(),
         // body("deskripsi").exists(),
         // body("urutan").exists(),
       ];
     }
-    case "updateInfo": {
+    case "updateTcd": {
       return [];
     }
   }
 };
-// Create and Save a new Info
+// Create and Save a new Tcd
 exports.create = async (req, res) => {
   const postUuid = req.params.postUuid;
   // Validate request
@@ -41,13 +41,13 @@ exports.create = async (req, res) => {
     tcd["pageSlug"] = postUuid;
   }
 
-  // Save Info in the database
-  Info.create(tcd)
+  // Save Tcd in the database
+  Tcd.create(tcd)
     .then(async (data) => {
       if (i18n instanceof Array && i18n.length > 0) {
         for (var i = 0; i < i18n.length; i++) {
           i18n[i]["tcdUuid"] = data.uuid;
-          await InfoI18n.create(i18n[i]);
+          await TcdI18n.create(i18n[i]);
         }
         await data.reload({ include: 'i18n' });
       }
@@ -57,12 +57,12 @@ exports.create = async (req, res) => {
       console.log('err', err);
       res.status(500).send({
         message:
-          err.message || "Some error occurred while creating the Info.",
+          err.message || "Some error occurred while creating the Tcd.",
       });
     });
 };
 
-// Update a Info by the uuid in the request
+// Update a Tcd by the uuid in the request
 exports.update = async (req, res) => {
   const postUuid = req.params.postUuid;
   const uuid = req.params.uuid;
@@ -73,17 +73,17 @@ exports.update = async (req, res) => {
   } else {
     tcd["pageSlug"] = postUuid;
   }
-  Info.findByPk(uuid)
+  Tcd.findByPk(uuid)
     .then(async (data) => {
       if (data == null) {
         res.status(404).send({
-          message: "Error updating Info with uuid=" + uuid,
+          message: "Error updating Tcd with uuid=" + uuid,
         });
       } else {
         if (i18n instanceof Array && i18n.length > 0) {
           for (var i = 0; i < i18n.length; i++) {
             const { lang, ...trans } = i18n[i];
-            const [obj, created] = await InfoI18n.findOrCreate({
+            const [obj, created] = await TcdI18n.findOrCreate({
               where: { tcdUuid: uuid, lang: lang },
               defaults: trans
             });
@@ -96,7 +96,7 @@ exports.update = async (req, res) => {
         data.update(tcd).then(async (result) => {
           await result.reload({ include: 'i18n' });
           res.send({
-            message: "Info was updated successfully.",
+            message: "Tcd was updated successfully.",
             data: result,
           });
         });
@@ -105,12 +105,12 @@ exports.update = async (req, res) => {
     .catch((err) => {
       console.log("err", err);
       res.status(500).send({
-        message: "Error updating Info with uuid=" + uuid,
+        message: "Error updating Tcd with uuid=" + uuid,
       });
     });
 };
 
-// Update a Info by the uuid in the request
+// Update a Tcd by the uuid in the request
 exports.updateBulk = async (req, res) => {
   const data = req.body.data;
   let messages = [];
@@ -119,14 +119,14 @@ exports.updateBulk = async (req, res) => {
       const uuid = data[i].uuid;
       delete data[i].uuid;
 
-      var result = await Info.update(data[i], {
+      var result = await Tcd.update(data[i], {
         where: { uuid: uuid },
       });
       if (result[0] > 0) {
-        messages.push(`Info with uuid ${uuid} was updated successfully.`);
+        messages.push(`Tcd with uuid ${uuid} was updated successfully.`);
       } else {
         messages.push(
-          `Cannot update Info with uuid=${uuid}. Maybe Info was not found or req.body is empty!`
+          `Cannot update Tcd with uuid=${uuid}. Maybe Tcd was not found or req.body is empty!`
         );
       }
     }
@@ -140,20 +140,20 @@ exports.updateBulk = async (req, res) => {
   }
 };
 
-// Delete a Info with the specified uuid in the request
+// Delete a Tcd with the specified uuid in the request
 exports.delete = (req, res) => {
   const uuid = req.params.uuid;
 
-  Info.findByPk(uuid)
+  Tcd.findByPk(uuid)
     .then((data) => {
       if (data == null) {
         res.status(404).send({
-          message: "Error deleting Info with uuid=" + uuid,
+          message: "Error deleting Tcd with uuid=" + uuid,
         });
       } else {
         data.destroy();
         res.send({
-          message: "Info was deleted successfully.",
+          message: "Tcd was deleted successfully.",
           data: data,
         });
       }
@@ -161,15 +161,15 @@ exports.delete = (req, res) => {
     .catch((err) => {
       console.log("err", err);
       res.status(500).send({
-        message: "Error deleting Info with uuid=" + uuid,
+        message: "Error deleting Tcd with uuid=" + uuid,
       });
     });
 };
 
-// Delete all Info from the database.
+// Delete all Tcd from the database.
 exports.deleteAll = (req, res) => {
   const postUuid = req.params.postUuid;
-  Info.destroy({
+  Tcd.destroy({
     where: {
       [Op.or]: [
         { postUuid: postUuid },
@@ -179,7 +179,7 @@ exports.deleteAll = (req, res) => {
     truncate: false,
   })
     .then((nums) => {
-      res.send({ message: `${nums} Info were deleted successfully!` });
+      res.send({ message: `${nums} Tcd were deleted successfully!` });
     })
     .catch((err) => {
       res.status(500).send({
