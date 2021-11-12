@@ -1,6 +1,7 @@
 //@ts-check
 const paginate = require("express-paginate");
 const db = require("../../models");
+const postConfig = require("../../config/post.config");
 const Post = db.post;
 const PostI18n = db.postI18n;
 const Photo = db.photo;
@@ -10,19 +11,6 @@ const InfoI18n = db.infoI18n;
 const StatusTol = db.statusTol;
 const StatusTolI18n = db.statusTolI18n;
 const Op = db.Sequelize.Op;
-
-const use_publish = [
-  'penghargaan',
-  'press-release',
-  'program-incindental',
-  'pengumuman-pengadaan'
-];
-
-
-const use_status_tol = [
-  'ruas-jalan-bisnis-konsesi',
-  'daftar-ruas-tol-dalam-tahap-konstruksi'
-];
 
 exports.findAll = (req, res) => {
   const lang = req.query.lang || "id";
@@ -39,7 +27,7 @@ exports.findAll = (req, res) => {
           ],
         }
         : null,
-      use_publish.includes(tipe) ? { status: "publish" } : null,
+        postConfig.use_publish.includes(tipe) ? { status: "publish" } : null,
       { tipe: tipe },
     ],
   };
@@ -57,86 +45,52 @@ exports.findAll = (req, res) => {
       { '$i18n.lang$': lang },
     ],
   };
+  var include = [
+    {
+      model: PostI18n,
+      as: 'i18n',
+      where: condition_i18n,
+    },
+    {
+      model: Photo,
+      as: 'photo',
+      include: [{
+        model: PhotoI18n,
+        as: 'i18n',
+        where: { '$photo->i18n.lang$': lang },
+      }],
+    },
+    {
+      model: Info,
+      as: 'info',
+      include: [{
+        model: InfoI18n,
+        as: 'i18n',
+        where: { '$info->i18n.lang$': lang },
+      }],
+    },
+    postConfig.use_status_tol.includes(tipe) ? {
+      model: StatusTol,
+      as: 'status_tol',
+      include: [{
+        model: StatusTolI18n,
+        as: 'i18n',
+        where: { '$status_tol->i18n.lang$': lang },
+      }],
+    } : null,
+  ].filter(function (el) {
+    return el != null;
+  })
   var query =
     nopage == 1
       ? Post.findAll({
         where: condition,
-        include: [
-          {
-            model: PostI18n,
-            as: 'i18n',
-            where: condition_i18n,
-          },
-          {
-            model: Photo,
-            as: 'photo',
-            include: [{
-              model: PhotoI18n,
-              as: 'i18n',
-              where: { '$photo->i18n.lang$': lang },
-            }],
-          },
-          {
-            model: Info,
-            as: 'info',
-            include: [{
-              model: InfoI18n,
-              as: 'i18n',
-              where: { '$info->i18n.lang$': lang },
-            }],
-          },
-          use_status_tol.includes(tipe) ? {
-            model: StatusTol,
-            as: 'status_tol',
-            include: [{
-              model: StatusTolI18n,
-              as: 'i18n',
-              where: { '$status_tol->i18n.lang$': lang },
-            }],
-          } : null,
-        ].filter(function (el) {
-          return el != null;
-        }),
+        include: include,
         order: [["createdAt", "DESC"]],
       })
       : Post.findAndCountAll({
         where: condition,
-        include: [
-          {
-            model: PostI18n,
-            as: 'i18n',
-            where: condition_i18n,
-          },
-          {
-            model: Photo,
-            as: 'photo',
-            include: [{
-              model: PhotoI18n,
-              as: 'i18n',
-              where: { '$photo->i18n.lang$': lang },
-            }],
-          },
-          {
-            model: Info,
-            as: 'info',
-            include: [{
-              model: InfoI18n,
-              as: 'i18n',
-              where: { '$info->i18n.lang$': lang },
-            }],
-          },
-          use_status_tol.includes(tipe) ? {
-            model: StatusTol,
-            as: 'status_tol',
-            include: [{
-              model: StatusTolI18n,
-              as: 'i18n',
-              where: { '$status_tol->i18n.lang$': lang },
-            }],
-          } : null,
-        ].filter(function (el) {
-          return el != null;
-        }),
+        include: include,
         limit: req.query.limit,
         offset: req.skip,
         order: [["createdAt", "DESC"]],
@@ -169,7 +123,7 @@ exports.findOne = (req, res) => {
   const tipe = req.params.tipe;
   const lang = req.query.lang || "id";
   var condition = { uuid: uuid, tipe: tipe };
-  if (use_publish.includes(tipe)) {
+  if (postConfig.use_publish.includes(tipe)) {
     condition["status"] = "publish";
   }
   Post.findOne({
@@ -198,7 +152,7 @@ exports.findOne = (req, res) => {
           where: { '$info->i18n.lang$': lang },
         }],
       },
-      use_status_tol.includes(tipe) ? {
+      postConfig.use_status_tol.includes(tipe) ? {
         model: StatusTol,
         as: 'status_tol',
         include: [{

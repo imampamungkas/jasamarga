@@ -24,6 +24,12 @@ module.exports = (sequelize, Sequelize) => {
       status_ruas_jalan: {
         type: Sequelize.TEXT,
       },
+      bujt: {
+        type: Sequelize.STRING,
+      },
+      panjang: {
+        type: Sequelize.STRING,
+      },
     },
     {
       tableName: "post_i18n",

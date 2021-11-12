@@ -2,6 +2,7 @@
 const paginate = require("express-paginate");
 const fs = require("fs");
 const db = require("../models");
+const postConfig = require("../config/post.config");
 const Post = db.post;
 const PostI18n = db.postI18n;
 const Photo = db.photo;
@@ -30,10 +31,6 @@ exports.validate = (method) => {
   }
 };
 
-const use_status_tol = [
-  'ruas-jalan-bisnis-konsesi',
-  'daftar-ruas-tol-dalam-tahap-konstruksi'
-];
 // Create and Save a new Post
 exports.create = async (req, res) => {
   const tipe = req.params.tipe;
@@ -135,81 +132,50 @@ exports.findAll = (req, res) => {
         : null,
     ],
   };
+  var include = [
+    {
+      model: PostI18n,
+      as: 'i18n',
+      where: condition_i18n,
+    },
+    {
+      model: Photo,
+      as: 'photo',
+      include: [{
+        model: PhotoI18n,
+        as: 'i18n',
+      }],
+    },
+    {
+      model: Info,
+      as: 'info',
+      include: [{
+        model: InfoI18n,
+        as: 'i18n',
+      }],
+    },
+    postConfig.use_status_tol.includes(tipe) ? {
+      model: StatusTol,
+      as: 'status_tol',
+      include: [{
+        model: StatusTolI18n,
+        as: 'i18n',
+      }],
+    } : null,
+  ].filter(function (el) {
+    return el != null;
+  });
 
   var query =
     nopage == 1
       ? Post.findAll({
         where: condition,
-        include: [
-          {
-            model: PostI18n,
-            as: 'i18n',
-            where: condition_i18n,
-          },
-          {
-            model: Photo,
-            as: 'photo',
-            include: [{
-              model: PhotoI18n,
-              as: 'i18n',
-            }],
-          },
-          {
-            model: Info,
-            as: 'info',
-            include: [{
-              model: InfoI18n,
-              as: 'i18n',
-            }],
-          },
-          use_status_tol.includes(tipe) ? {
-            model: StatusTol,
-            as: 'status_tol',
-            include: [{
-              model: StatusTolI18n,
-              as: 'i18n',
-            }],
-          } : null,
-        ].filter(function (el) {
-          return el != null;
-        }),
+        include: include,
         order: [["updatedAt", "DESC"]],
       })
       : Post.findAndCountAll({
         where: condition,
-        include: [
-          {
-            model: PostI18n,
-            as: 'i18n',
-            where: condition_i18n,
-          },
-          {
-            model: Photo,
-            as: 'photo',
-            include: [{
-              model: PhotoI18n,
-              as: 'i18n',
-            }],
-          },
-          {
-            model: Info,
-            as: 'info',
-            include: [{
-              model: InfoI18n,
-              as: 'i18n',
-            }],
-          },
-          use_status_tol.includes(tipe) ? {
-            model: StatusTol,
-            as: 'status_tol',
-            include: [{
-              model: StatusTolI18n,
-              as: 'i18n',
-            }],
-          } : null,
-        ].filter(function (el) {
-          return el != null;
-        }),
+        include: include,
         limit: req.query.limit,
         offset: req.skip,
         order: [["updatedAt", "DESC"]],
@@ -265,7 +231,7 @@ exports.findOne = (req, res) => {
           as: 'i18n',
         }],
       },
-      use_status_tol.includes(tipe) ? {
+      postConfig.use_status_tol.includes(tipe) ? {
         model: StatusTol,
         as: 'status_tol',
         include: [{

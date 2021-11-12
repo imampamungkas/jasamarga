@@ -1,5 +1,6 @@
 //@ts-check
 const db = require("../../models");
+const pageConfig = require("../../config/page.config");
 const Page = db.page;
 const PageI18n = db.pageI18n;
 const Gallery = db.gallery;
@@ -13,20 +14,6 @@ const RestAreaI18n = db.restAreaI18n;
 const Residential = db.residential;
 const ResidentialI18n = db.residentialI18n;
 
-const use_info = [
-  'tata-nilai',
-  'bisnis-lainnya'
-];
-
-const use_tcd = [
-  'tcd',
-];
-const use_rest_area = [
-  'rest-area',
-];
-const use_residential = [
-  'residential',
-];
 // Find a single Page with an id
 exports.findOne = (req, res) => {
   const slug = req.params.slug;
@@ -49,7 +36,7 @@ exports.findOne = (req, res) => {
           where: { '$gallery->i18n.lang$': lang },
         }],
       },
-      use_info.includes(slug) ? {
+      pageConfig.use_info.includes(slug) ? {
         model: Info,
         as: 'info',
         include: [{
@@ -58,7 +45,7 @@ exports.findOne = (req, res) => {
           where: { '$info->i18n.lang$': lang },
         }],
       } : null,
-      use_tcd.includes(slug) ? {
+      pageConfig.use_tcd.includes(slug) ? {
         model: Tcd,
         as: 'tcd',
         include: [{
@@ -67,7 +54,7 @@ exports.findOne = (req, res) => {
           where: { '$tcd->i18n.lang$': lang },
         }],
       } : null,
-      use_rest_area.includes(slug) ? {
+      pageConfig.use_rest_area.includes(slug) ? {
         model: RestArea,
         as: 'rest_area',
         include: [{
@@ -76,7 +63,7 @@ exports.findOne = (req, res) => {
           where: { '$rest_area->i18n.lang$': lang },
         }],
       } : null,
-      use_residential.includes(slug) ? {
+      pageConfig.use_residential.includes(slug) ? {
         model: Residential,
         as: 'residential',
         include: [{
