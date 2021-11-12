@@ -24,6 +24,9 @@ module.exports = (sequelize, Sequelize) => {
       tersedia_spbu: {
         type: Sequelize.STRING,
       },
+      daerah: {
+        type: Sequelize.STRING,
+      },
     },
     {
       tableName: "rest_area_i18n",
