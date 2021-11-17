@@ -191,7 +191,7 @@ exports.findAll = (req, res) => {
           results: results.rows,
           pageCount,
           itemCount,
-          pages: paginate.getArrayPages(req)(3, pageCount, req.query.page),
+          pages: paginate.getArrayPages(req)(req.query.limit, pageCount, req.query.page),
         });
       }
     })

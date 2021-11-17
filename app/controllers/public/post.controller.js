@@ -27,7 +27,7 @@ exports.findAll = (req, res) => {
           ],
         }
         : null,
-        postConfig.use_publish.includes(tipe) ? { status: "publish" } : null,
+      postConfig.use_publish.includes(tipe) ? { status: "publish" } : null,
       { tipe: tipe },
     ],
   };
@@ -57,7 +57,7 @@ exports.findAll = (req, res) => {
       include: [{
         model: PhotoI18n,
         as: 'i18n',
-        where: { '$photo->i18n.lang$': lang },
+        // where: { '$photo->i18n.lang$': lang },
       }],
     },
     {
@@ -66,7 +66,8 @@ exports.findAll = (req, res) => {
       include: [{
         model: InfoI18n,
         as: 'i18n',
-        where: { '$info->i18n.lang$': lang },
+        // where: { '$info->i18n.lang$': lang },
+        duplicating: true
       }],
     },
     postConfig.use_status_tol.includes(tipe) ? {
@@ -75,7 +76,7 @@ exports.findAll = (req, res) => {
       include: [{
         model: StatusTolI18n,
         as: 'i18n',
-        where: { '$status_tol->i18n.lang$': lang },
+        // where: { '$status_tol->i18n.lang$': lang },
       }],
     } : null,
   ].filter(function (el) {
@@ -106,11 +107,12 @@ exports.findAll = (req, res) => {
           results: results.rows,
           pageCount,
           itemCount,
-          pages: paginate.getArrayPages(req)(3, pageCount, req.query.page),
+          pages: paginate.getArrayPages(req)(req.query.limit, pageCount, req.query.page),
         });
       }
     })
     .catch((err) => {
+      console.log(err);
       res.status(500).send({
         message: err.message || "Some error occurred while retrieving users.",
       });
