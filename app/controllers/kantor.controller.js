@@ -14,9 +14,9 @@ exports.validate = (method) => {
         body("tipe").exists(),
         // body("nama_kantor").exists(),
         // body("alamat").exists(),
-        body("telepon").exists(),
-        body("fax").exists(),
-        body("email").exists().isEmail(),
+        // body("telepon").exists(),
+        // body("fax").exists(),
+        // body("email").exists().isEmail(),
       ];
     }
     case "updateKantor": {

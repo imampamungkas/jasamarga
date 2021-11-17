@@ -18,12 +18,20 @@ module.exports = (sequelize, Sequelize) => {
       },
       nama_file: {
         type: Sequelize.STRING,
+        get() {
+          const rawValue = this.getDataValue('nama_file');
+          if (rawValue) {
+            const tmpValue = rawValue.split('/');
+            return tmpValue[tmpValue.length - 1];
+          }
+          return null;
+        }
       },
       nama_file_url: {
         type: Sequelize.VIRTUAL,
         get() {
           return this.nama_file
-            ? `${process.env.BASE_URL}/uploads/${this.nama_file}`
+            ? `${process.env.BASE_URL}/uploads/${this.getDataValue('nama_file')}`
             : null;
         },
         set(value) {

@@ -16,12 +16,20 @@ module.exports = (sequelize, Sequelize) => {
       },
       presskit_file: {
         type: Sequelize.STRING,
+        get() {
+          const rawValue = this.getDataValue('presskit_file');
+          if (rawValue) {
+            const tmpValue = rawValue.split('/');
+            return tmpValue[tmpValue.length - 1];
+          }
+          return null;
+        }
       },
       presskit_file_url: {
         type: Sequelize.VIRTUAL,
         get() {
           return this.presskit_file
-            ? `${process.env.BASE_URL}/uploads/${this.presskit_file}`
+            ? `${process.env.BASE_URL}/uploads/${this.getDataValue('presskit_file')}`
             : null;
         },
         set(value) {

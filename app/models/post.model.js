@@ -17,12 +17,20 @@ module.exports = (sequelize, Sequelize) => {
       },
       nama_file: {
         type: Sequelize.STRING,
+        get() {
+          const rawValue = this.getDataValue('nama_file');
+          if (rawValue) {
+            const tmpValue = rawValue.split('/');
+            return tmpValue[tmpValue.length - 1];
+          }
+          return null;
+        }
       },
       nama_file_url: {
         type: Sequelize.VIRTUAL,
         get() {
           return this.nama_file
-            ? `${process.env.BASE_URL}/uploads/${this.nama_file}`
+            ? `${process.env.BASE_URL}/uploads/${this.getDataValue('nama_file')}`
             : null;
         },
         set(value) {
@@ -31,12 +39,20 @@ module.exports = (sequelize, Sequelize) => {
       },
       dokumen_file: {
         type: Sequelize.STRING,
+        get() {
+          const rawValue = this.getDataValue('dokumen_file');
+          if (rawValue) {
+            const tmpValue = rawValue.split('/');
+            return tmpValue[tmpValue.length - 1];
+          }
+          return null;
+        }
       },
       dokumen_file_url: {
         type: Sequelize.VIRTUAL,
         get() {
           return this.dokumen_file
-            ? `${process.env.BASE_URL}/uploads/${this.dokumen_file}`
+            ? `${process.env.BASE_URL}/uploads/${this.getDataValue('dokumen_file')}`
             : null;
         },
         set(value) {
