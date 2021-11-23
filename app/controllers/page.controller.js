@@ -111,6 +111,25 @@ exports.update = async (req, res) => {
       delete page.nama_file;
     }
   }
+  if (req.body.hasOwnProperty("nama_file2")) {
+    if (req.body.nama_file2) {
+      var file_name = req.body.nama_file2.nama;
+      const b = Buffer.from(req.body.nama_file2.data, "base64");
+      const timestamp = `page/${new Date().getTime()}`;
+      var dir = `public/uploads/${timestamp}/`;
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      fs.writeFile(dir + file_name, b, function (err) {
+        if (!err) {
+          console.log("file is created", file_name);
+        }
+      });
+      page["nama_file2"] = `${timestamp}/${file_name}`;
+    } else {
+      delete page.nama_file2;
+    }
+  }
   Page.findOrCreate({
     where: { slug: slug },
     defaults: page
