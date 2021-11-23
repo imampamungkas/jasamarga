@@ -30,6 +30,15 @@ module.exports = (sequelize, Sequelize) => {
       panjang: {
         type: Sequelize.STRING,
       },
+      alamat: {
+        type: Sequelize.TEXT,
+      },
+      nama_usaha: {
+        type: Sequelize.STRING,
+      },
+      kategori_usaha: {
+        type: Sequelize.STRING,
+      },
     },
     {
       tableName: "post_i18n",
