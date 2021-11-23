@@ -14,6 +14,11 @@ module.exports = (sequelize, Sequelize) => {
         ),
         defaultValue: "foto",
       },
+      presskit_url: {
+        type: Sequelize.STRING,
+        allowNull: true,
+        defaultValue: null,
+      },
       presskit_file: {
         type: Sequelize.STRING,
         get() {
