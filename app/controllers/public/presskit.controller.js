@@ -14,14 +14,6 @@ exports.findAll = (req, res) => {
 
   var condition = {
     [Op.and]: [
-      search
-        ? {
-          [Op.or]: [
-            { cover_file: { [Op.like]: `%${search}%` } },
-            { presskit_file: { [Op.like]: `%${search}%` } },
-          ],
-        }
-        : null,
       { status: "publish" },
       tipe ? { tipe: tipe } : null,
     ],
@@ -34,6 +26,7 @@ exports.findAll = (req, res) => {
           [Op.or]: [
             { '$i18n.nama$': { [Op.like]: `%${search}%` } },
             { '$i18n.deskripsi$': { [Op.like]: `%${search}%` } },
+            { '$presskit.presskit_file$': { [Op.like]: `%${search}%` } },
           ],
         }
         : null,

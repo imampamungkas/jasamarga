@@ -7,7 +7,6 @@ const Op = db.Sequelize.Op;
 
 const { body } = require("express-validator");
 const { validationResult } = require("express-validator");
-const { penghargaan } = require("../models");
 
 exports.validate = (method) => {
   switch (method) {
@@ -82,13 +81,6 @@ exports.findAll = (req, res) => {
 
   var condition = {
     [Op.and]: [
-      search
-        ? {
-          [Op.or]: [
-            { nama_file: { [Op.like]: `%${search}%` } },
-          ],
-        }
-        : null,
       status ? { status: status } : null,
       tahun ? { tahun: tahun } : null,
     ],
@@ -101,6 +93,7 @@ exports.findAll = (req, res) => {
           [Op.or]: [
             { '$i18n.nama$': { [Op.like]: `%${search}%` } },
             { '$i18n.deskripsi$': { [Op.like]: `%${search}%` } },
+            { '$penghargaan.nama_file$': { [Op.like]: `%${search}%` } },
           ],
         }
         : null,

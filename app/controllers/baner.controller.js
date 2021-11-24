@@ -83,13 +83,6 @@ exports.findAll = (req, res) => {
 
   var condition = {
     [Op.and]: [
-      search
-        ? {
-          [Op.or]: [
-            { nama_file: { [Op.like]: `%${search}%` } },
-          ],
-        }
-        : null,
       status ? { status: status } : null,
       { tipe: tipe },
     ],
@@ -102,6 +95,7 @@ exports.findAll = (req, res) => {
           [Op.or]: [
             { '$i18n.nama$': { [Op.like]: `%${search}%` } },
             { '$i18n.deskripsi$': { [Op.like]: `%${search}%` } },
+            { '$baner.nama_file$': { [Op.like]: `%${search}%` } },
           ],
         }
         : null,
