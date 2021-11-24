@@ -78,19 +78,6 @@ exports.findAll = (req, res) => {
   const nopage = req.query.nopage || 0;
   const search = req.query.search;
 
-  var condition = {
-    [Op.and]: [
-      search
-        ? {
-          [Op.or]: [
-            { sumber_link: { [Op.like]: `%${search}%` } },
-            { nama_file: { [Op.like]: `%${search}%` } },
-          ],
-        }
-        : null,
-    ],
-  };
-
   var condition_i18n = {
     [Op.and]: [
       search
@@ -101,6 +88,8 @@ exports.findAll = (req, res) => {
             { '$i18n.pertanyaan$': { [Op.like]: `%${search}%` } },
             { '$i18n.implementasi$': { [Op.like]: `%${search}%` } },
             { '$i18n.sumber_judul$': { [Op.like]: `%${search}%` } },
+            { '$asean.sumber_link$': { [Op.like]: `%${search}%` } },
+            { '$asean.nama_file$': { [Op.like]: `%${search}%` } },
           ],
         }
         : null,
@@ -110,7 +99,6 @@ exports.findAll = (req, res) => {
   var query =
     nopage == 1
       ? Asean.findAll({
-        where: condition,
         include: {
           model: AseanI18n,
           as: 'i18n',
@@ -122,7 +110,6 @@ exports.findAll = (req, res) => {
         ],
       })
       : Asean.findAndCountAll({
-        where: condition,
         include: {
           model: AseanI18n,
           as: 'i18n',

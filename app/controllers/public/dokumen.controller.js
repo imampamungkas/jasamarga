@@ -23,13 +23,6 @@ exports.findAll = (req, res) => {
 
   var condition = {
     [Op.and]: [
-      search
-        ? {
-          [Op.or]: [
-            { dokumen_file: { [Op.like]: `%${search}%` } },
-          ],
-        }
-        : null,
       use_publish.includes(tipe) ? { status: "publish" } : null,
       tahun ? { tahun: tahun } : null,
       { tipe: tipe },
@@ -43,6 +36,8 @@ exports.findAll = (req, res) => {
           [Op.or]: [
             { '$i18n.nama$': { [Op.like]: `%${search}%` } },
             { '$i18n.deskripsi$': { [Op.like]: `%${search}%` } },
+            { '$dokumen.cover_file$': { [Op.like]: `%${search}%` } },
+            { '$dokumen.dokumen_file$': { [Op.like]: `%${search}%` } },
           ],
         }
         : null,

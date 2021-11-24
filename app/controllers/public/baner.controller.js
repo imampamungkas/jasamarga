@@ -1,6 +1,7 @@
 //@ts-check
 const paginate = require("express-paginate");
 const db = require("../../models");
+const banerConfig = require("../../config/baner.config");
 const Baner = db.baner;
 const BanerI18n = db.banerI18n;
 const Op = db.Sequelize.Op;
@@ -13,14 +14,7 @@ exports.findAll = (req, res) => {
 
   var condition = {
     [Op.and]: [
-      search
-        ? {
-          [Op.or]: [
-            { nama_file: { [Op.like]: `%${search}%` } },
-          ],
-        }
-        : null,
-      { status: "publish" },
+      banerConfig.use_publish.includes(tipe) ? { status: "publish" } : null,
       { tipe: tipe },
     ],
   };
@@ -32,6 +26,7 @@ exports.findAll = (req, res) => {
           [Op.or]: [
             { '$i18n.nama$': { [Op.like]: `%${search}%` } },
             { '$i18n.deskripsi$': { [Op.like]: `%${search}%` } },
+            { '$baner.nama_file$': { [Op.like]: `%${search}%` } },
           ],
         }
         : null,
@@ -88,10 +83,12 @@ exports.findOne = (req, res) => {
   const tipe = req.params.tipe;
   const lang = req.query.lang || "id";
 
+  var condition = { uuid: uuid, tipe: tipe };
+  if (banerConfig.use_publish.includes(tipe)) {
+    condition["status"] = "publish";
+  }
   Baner.findOne({
-    where: {
-      [Op.and]: [{ uuid: uuid }, { tipe: tipe }]
-    },
+    where: condition,
     include: {
       model: BanerI18n,
       as: 'i18n',

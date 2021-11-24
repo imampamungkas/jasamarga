@@ -64,15 +64,6 @@ exports.findAll = (req, res) => {
 
   var condition = {
     [Op.and]: [
-      search
-        ? {
-          [Op.or]: [
-            { telepon: { [Op.like]: `%${search}%` } },
-            { fax: { [Op.like]: `%${search}%` } },
-            { email: { [Op.like]: `%${search}%` } },
-          ],
-        }
-        : null,
       tipe ? { tipe: tipe } : null,
     ],
   };
@@ -84,6 +75,9 @@ exports.findAll = (req, res) => {
           [Op.or]: [
             { '$i18n.nama_kantor$': { [Op.like]: `%${search}%` } },
             { '$i18n.alamat$': { [Op.like]: `%${search}%` } },
+            { '$kantor.telepon$': { [Op.like]: `%${search}%` } },
+            { '$kantor.fax$': { [Op.like]: `%${search}%` } },
+            { '$kantor.email$': { [Op.like]: `%${search}%` } },
           ],
         }
         : null,

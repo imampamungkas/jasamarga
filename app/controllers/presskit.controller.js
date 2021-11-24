@@ -131,13 +131,6 @@ exports.findAll = (req, res) => {
 
   var condition = {
     [Op.and]: [
-      search
-        ? {
-          [Op.or]: [
-            { presskit_file: { [Op.like]: `%${search}%` } },
-          ],
-        }
-        : null,
       tipe ? { tipe: tipe } : null,
       status ? { status: status } : null,
     ],
@@ -150,6 +143,7 @@ exports.findAll = (req, res) => {
           [Op.or]: [
             { '$i18n.nama$': { [Op.like]: `%${search}%` } },
             { '$i18n.deskripsi$': { [Op.like]: `%${search}%` } },
+            { '$presskit.presskit_file$': { [Op.like]: `%${search}%` } },
           ],
         }
         : null,
@@ -273,7 +267,7 @@ exports.update_form = async (req, res) => {
                 where: { presskitUuid: uuid, lang: key },
                 defaults: value
               });
-              if(!created){
+              if (!created) {
                 obj.update(value);
               }
             }
@@ -343,7 +337,7 @@ exports.update = async (req, res) => {
               where: { presskitUuid: uuid, lang: lang },
               defaults: trans
             });
-            if(!created){
+            if (!created) {
               obj.update(trans);
             }
           }
