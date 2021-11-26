@@ -7,6 +7,10 @@ module.exports = (sequelize, Sequelize) => {
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
       },
+      urutan: {
+        type: Sequelize.INTEGER,
+        defaultValue: 0,
+      },
     },
     {
       tableName: "info",

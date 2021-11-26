@@ -38,6 +38,8 @@ exports.findOne = (req, res) => {
       pageConfig.use_info.includes(slug) ? {
         model: Info,
         as: 'info',
+        order: [["urutan", "ASC"]],
+        separate: true,
         include: [{
           model: InfoI18n,
           as: 'i18n',
