@@ -143,6 +143,8 @@ exports.findAll = (req, res) => {
     {
       model: Info,
       as: 'info',
+      order: [["urutan", "ASC"]],
+      separate: true,
       include: [{
         model: InfoI18n,
         as: 'i18n',
@@ -220,6 +222,8 @@ exports.findOne = (req, res) => {
       {
         model: Info,
         as: 'info',
+        order: [["urutan", "ASC"]],
+        separate: true,
         include: [{
           model: InfoI18n,
           as: 'i18n',

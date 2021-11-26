@@ -48,29 +48,33 @@ exports.findAll = (req, res) => {
     {
       model: Photo,
       as: 'photo',
+      separate: true,
       include: [{
         model: PhotoI18n,
         as: 'i18n',
-        // where: { '$photo->i18n.lang$': lang },
+        where: { '$i18n.lang$': lang },
       }],
     },
     {
       model: Info,
       as: 'info',
+      order: [["urutan", "ASC"]],
+      separate: true,
       include: [{
         model: InfoI18n,
         as: 'i18n',
-        // where: { '$info->i18n.lang$': lang },
+        where: { '$i18n.lang$': lang },
         duplicating: true
       }],
     },
     postConfig.use_status_tol.includes(tipe) ? {
       model: StatusTol,
       as: 'status_tol',
+      separate: true,
       include: [{
         model: StatusTolI18n,
         as: 'i18n',
-        // where: { '$status_tol->i18n.lang$': lang },
+        where: { '$i18n.lang$': lang },
       }],
     } : null,
   ].filter(function (el) {
@@ -133,28 +137,32 @@ exports.findOne = (req, res) => {
       {
         model: Photo,
         as: 'photo',
+        separate: true,
         include: [{
           model: PhotoI18n,
           as: 'i18n',
-          where: { '$photo->i18n.lang$': lang },
+          where: { '$i18n.lang$': lang },
         }],
       },
       {
         model: Info,
         as: 'info',
+        order: [["urutan", "ASC"]],
+        separate: true,
         include: [{
           model: InfoI18n,
           as: 'i18n',
-          where: { '$info->i18n.lang$': lang },
+          where: { '$i18n.lang$': lang },
         }],
       },
       postConfig.use_status_tol.includes(tipe) ? {
         model: StatusTol,
         as: 'status_tol',
+        separate: true,
         include: [{
           model: StatusTolI18n,
           as: 'i18n',
-          where: { '$status_tol->i18n.lang$': lang },
+          where: { '$i18n.lang$': lang },
         }],
       } : null,
     ].filter(function (el) {

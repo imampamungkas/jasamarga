@@ -30,46 +30,52 @@ exports.findOne = (req, res) => {
       {
         model: Gallery,
         as: 'gallery',
+        separate: true,
         include: [{
           model: GalleryI18n,
           as: 'i18n',
-          where: { '$gallery->i18n.lang$': lang },
+          where: { '$i18n.lang$': lang },
         }],
       },
       pageConfig.use_info.includes(slug) ? {
         model: Info,
         as: 'info',
+        order: [["urutan", "ASC"]],
+        separate: true,
         include: [{
           model: InfoI18n,
           as: 'i18n',
-          where: { '$info->i18n.lang$': lang },
+          where: { '$i18n.lang$': lang },
         }],
       } : null,
       pageConfig.use_tcd.includes(slug) ? {
         model: Tcd,
         as: 'tcd',
+        separate: true,
         include: [{
           model: TcdI18n,
           as: 'i18n',
-          where: { '$tcd->i18n.lang$': lang },
+          where: { '$i18n.lang$': lang },
         }],
       } : null,
       pageConfig.use_rest_area.includes(slug) ? {
         model: RestArea,
         as: 'rest_area',
+        separate: true,
         include: [{
           model: RestAreaI18n,
           as: 'i18n',
-          where: { '$rest_area->i18n.lang$': lang },
+          where: { '$i18n.lang$': lang },
         }],
       } : null,
       pageConfig.use_residential.includes(slug) ? {
         model: Residential,
         as: 'residential',
+        separate: true,
         include: [{
           model: ResidentialI18n,
           as: 'i18n',
-          where: { '$residential->i18n.lang$': lang },
+          where: { '$i18n.lang$': lang },
         }],
       } : null,
     ].filter(function (el) {

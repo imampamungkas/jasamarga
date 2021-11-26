@@ -3,10 +3,10 @@ const db = require("../models");
 const Op = db.Sequelize.Op;
 const Info = db.info;
 const InfoI18n = db.infoI18n;
+const Page = db.page;
 
 const { body } = require("express-validator");
 const { validationResult } = require("express-validator");
-const regexExpUuid = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi;
 
 
 exports.validate = (method) => {
@@ -35,11 +35,13 @@ exports.create = async (req, res) => {
   }
 
   const { i18n, ...info } = req.body;
-  if (regexExpUuid.test(postUuid)) {
-    info["postUuid"] = postUuid;
-  } else {
+  Page.findOne({
+    where: { slug: postUuid },
+  }).then((data) => {
     info["pageSlug"] = postUuid;
-  }
+  }).catch((err) => {
+    info["postUuid"] = postUuid;
+  })
 
   // Save Info in the database
   Info.create(info)
@@ -68,11 +70,13 @@ exports.update = async (req, res) => {
   const uuid = req.params.uuid;
 
   const { i18n, ...info } = req.body;
-  if (regexExpUuid.test(postUuid)) {
-    info["postUuid"] = postUuid;
-  } else {
+  Page.findOne({
+    where: { slug: postUuid },
+  }).then((data) => {
     info["pageSlug"] = postUuid;
-  }
+  }).catch((err) => {
+    info["postUuid"] = postUuid;
+  })
   Info.findByPk(uuid)
     .then(async (data) => {
       if (data == null) {
