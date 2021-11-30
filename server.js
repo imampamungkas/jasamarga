@@ -51,6 +51,7 @@ require("./app/routes/public.routes")(app);
 require("./app/routes/auth.routes")(app);
 require("./app/routes/profile.routes")(app);
 require("./app/routes/user.routes")(app);
+require("./app/routes/role.routes")(app);
 require("./app/routes/baner.routes")(app);
 require("./app/routes/pejabat.routes")(app);
 require("./app/routes/penghargaan.routes")(app);
@@ -68,6 +69,7 @@ require("./app/routes/tcd.routes")(app);
 require("./app/routes/rest_area.routes")(app);
 require("./app/routes/residential.routes")(app);
 require("./app/routes/status_tol.routes")(app);
+require("./app/routes/pencarian.routes")(app);
 var upload = require("./upload.js");
 app.post("/upload", upload);
 

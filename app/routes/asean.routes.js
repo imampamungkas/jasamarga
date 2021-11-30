@@ -1,8 +1,8 @@
 module.exports = (app) => {
   const passport = require("passport");
   const asean = require("../controllers/asean.controller.js");
-  const authorize = require("../helpers/authorize");
-  const Role = require("../helpers/role");
+  // const authorize = require("../helpers/authorize");
+  // const Role = require("../helpers/role");
 
   var router = require("express").Router();
 
@@ -27,7 +27,7 @@ module.exports = (app) => {
   app.use(
     "/api/asean",
     passport.authenticate("jwt", { session: false }),
-    authorize(Role.Admin),
+    // authorize([Role.Admin]),
     router
   );
 };

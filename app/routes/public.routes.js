@@ -10,6 +10,7 @@ module.exports = (app) => {
   const post = require("../controllers/public/post.controller.js");
   const kontak = require("../controllers/public/kontak.controller.js");
   const page = require("../controllers/public/page.controller.js");
+  const pencarian = require("../controllers/public/pencarian.controller.js");
   const travoy = require("../controllers/public/travoy.controller.js");
   var router = require("express").Router();
 
@@ -59,6 +60,10 @@ module.exports = (app) => {
   // Create a new kontak
   router.post("/kontak", kontak.validate("createKontak"), kontak.create);
 
+  // Retrieve all pencarian
+  router.get("/pencarian", pencarian.findAll);
+  // Retrieve pencarian
+  router.get("/pencarian/:uuid", pencarian.findByPk);
 
   // Retrieve all asal
   router.get("/travoy/asal", travoy.findAsal);

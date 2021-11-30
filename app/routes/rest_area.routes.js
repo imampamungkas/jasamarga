@@ -22,7 +22,7 @@ module.exports = (app) => {
   app.use(
     "/api/rest-area",
     passport.authenticate("jwt", { session: false }),
-    authorize([Role.Admin]),
+    // authorize([Role.Admin]),
     router
   );
 };

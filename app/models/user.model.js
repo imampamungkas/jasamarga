@@ -52,10 +52,6 @@ module.exports = (sequelize, Sequelize) => {
       allowNull: false,
       unique: true,
     },
-    role: {
-      type: Sequelize.ENUM("admin", "user"),
-      defaultValue: "user",
-    },
     password: {
       type: Sequelize.STRING,
       is: /^[0-9a-f]{64}$/i,
@@ -70,11 +66,6 @@ module.exports = (sequelize, Sequelize) => {
     is_active: {
       type: Sequelize.BOOLEAN,
       defaultValue: false,
-    },
-    alasan_ditolak: {
-      type: Sequelize.TEXT,
-      allowNull: true,
-      defaultValue: null,
     },
   });
   User.prototype.isValidPassword = async function (password) {

@@ -1,11 +1,9 @@
-const paginate = require("express-paginate");
 const FileType = require("file-type");
 const fs = require("fs");
 const db = require("../models");
 const User = db.users;
-const Permohonan = db.permohonans;
-const Keberatan = db.keberatans;
-const Op = db.Sequelize.Op;
+const Role = db.roles;
+const Akses = db.akses;
 
 const { body } = require("express-validator");
 const { validationResult } = require("express-validator");
@@ -54,7 +52,17 @@ exports.validate = (method) => {
 exports.findOne = (req, res) => {
   const id = req.user.id;
 
-  User.findByPk(id)
+  User.findOne({
+    where: { id: id },
+    include: {
+      model: Role,
+      as: 'role',
+      include: [{
+        model: Akses,
+        as: 'akses_role',
+      }],
+    },
+  })
     .then((data) => {
       if (data == null) {
         res.status(404).send({
