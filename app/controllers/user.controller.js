@@ -1,9 +1,9 @@
 const paginate = require("express-paginate");
 const FileType = require("file-type");
-const moment = require("moment");
 const fs = require("fs");
 const db = require("../models");
 const User = db.users;
+const Role = db.roles;
 const Op = db.Sequelize.Op;
 
 const { body } = require("express-validator");
@@ -42,11 +42,23 @@ exports.validate = (method) => {
           });
         }),
         body("password").exists(),
+        body("roleNama")
+          .optional()
+          .custom(async (value) => {
+            const roles = await Role.findAll({ attributes: ['nama'] })
+              .then(function (roles) {
+                return roles.map(role => { return role.nama; })
+              });
+            if (!roles.includes(value)) {
+              return Promise.reject("Role not found!");
+            }
+          }),
       ];
     }
     case "updateUser": {
       return [
         body("email")
+          .optional()
           .isEmail()
           .custom((value) => {
             return User.findOne({ where: { email: value } }).then((user) => {
@@ -54,6 +66,18 @@ exports.validate = (method) => {
                 return Promise.reject("E-mail already in use!");
               }
             });
+          }),
+        body("roleNama")
+          .optional()
+          .custom(async (value) => {
+            const roles = await Role.findAll({ attributes: ['nama'] })
+              .then(function (roles) {
+                return roles.map(role => { return role.nama; })
+              });
+            if (!roles.includes(value)) {
+              return Promise.reject("Role not found!");
+            }
+            console.log('roles', roles);
           }),
       ];
     }
@@ -69,34 +93,21 @@ exports.create = async (req, res) => {
     return;
   }
 
-  let file_name = null;
-  if (req.body.hasOwnProperty("file_identitas")) {
-    if (req.body.file_identitas) {
-      const file_type = await FileType.fromBuffer(
-        Buffer.from(req.body.file_identitas, "base64")
-      );
-      file_name = `${Math.floor(Date.now() / 1000)}.${file_type.ext}`;
-      let b = Buffer.from(req.body.file_identitas, "base64");
-      fs.writeFile("public/uploads/" + file_name, b, function (err) {
-        if (!err) {
-          console.log("file is created");
-        }
-      });
-    }
-  }
 
-  const user = {
-    nama_lengkap: req.body.nama_lengkap,
-    alamat_lengkap: req.body.alamat_lengkap,
-    jenis_identitas: req.body.jenis_identitas,
-    no_identitas: req.body.no_identitas,
-    file_identitas: file_name,
-    pekerjaan: req.body.pekerjaan,
-    email: req.body.email,
-    no_hp: req.body.no_hp,
-    username: req.body.username,
-    password: req.body.password,
-  };
+  const { file_identitas, ...user } = req.body;
+  if (file_identitas != null) {
+    const file_type = await FileType.fromBuffer(
+      Buffer.from(file_identitas, "base64")
+    );
+    let file_name = `${Math.floor(Date.now() / 1000)}.${file_type.ext}`;
+    let b = Buffer.from(file_identitas, "base64");
+    fs.writeFile("public/uploads/" + file_name, b, function (err) {
+      if (!err) {
+        console.log("file is created");
+      }
+    });
+    user["file_identitas"] = file_name;
+  }
 
   // Save User in the database
   User.create(user)
@@ -120,13 +131,13 @@ exports.findAll = (req, res) => {
     [Op.and]: [
       search
         ? {
-            [Op.or]: [
-              { email: { [Op.like]: `%${search}%` } },
-              { username: { [Op.like]: `%${search}%` } },
-              { nama_lengkap: { [Op.like]: `%${search}%` } },
-              { alamat_lengkap: { [Op.like]: `%${search}%` } },
-            ],
-          }
+          [Op.or]: [
+            { email: { [Op.like]: `%${search}%` } },
+            { username: { [Op.like]: `%${search}%` } },
+            { nama_lengkap: { [Op.like]: `%${search}%` } },
+            { alamat_lengkap: { [Op.like]: `%${search}%` } },
+          ],
+        }
         : null,
       is_verified ? { is_verified: is_verified } : null,
       is_active ? { is_active: is_active } : null,
@@ -221,6 +232,7 @@ exports.update = async (req, res) => {
       }
     })
     .catch((err) => {
+      console.log(err);
       res.status(500).send({
         message: "Error updating User with id=" + id,
       });

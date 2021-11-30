@@ -34,7 +34,7 @@ module.exports = (app) => {
   app.use(
     "/api/presskit",
     passport.authenticate("jwt", { session: false }),
-    authorize([Role.Admin]),
+    // authorize([Role.Admin]),
     router
   );
 };

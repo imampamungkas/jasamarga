@@ -2,8 +2,8 @@
 module.exports = (app) => {
   const passport = require("passport");
   const baner = require("../controllers/baner.controller.js");
-  const authorize = require("../helpers/authorize");
-  const Role = require("../helpers/role");
+  // const authorize = require("../helpers/authorize");
+  // const Role = require("../helpers/role");
 
   var router = require("express").Router();
 
@@ -31,7 +31,7 @@ module.exports = (app) => {
   app.use(
     "/api/baner",
     passport.authenticate("jwt", { session: false }),
-    authorize([Role.Admin]),
+    // authorize([Role.Admin]),
     router
   );
 };

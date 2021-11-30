@@ -28,7 +28,7 @@ module.exports = (app) => {
   app.use(
     "/api/dokumen",
     passport.authenticate("jwt", { session: false }),
-    authorize([Role.Admin]),
+    // authorize([Role.Admin]),
     router
   );
 };

@@ -19,6 +19,8 @@ db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
 db.users = require("./user.model.js")(sequelize, Sequelize);
+db.roles = require("./role.model.js")(sequelize, Sequelize);
+db.akses = require("./akses.model.js")(sequelize, Sequelize);
 db.tokens = require("./token.model.js")(sequelize, Sequelize);
 db.refresTokens = require("./refresh_token.model.js")(sequelize, Sequelize);
 db.kontak = require("./kontak.model.js")(sequelize, Sequelize);
@@ -55,12 +57,29 @@ db.dokumenI18n = require("./dokumen-i18n.model.js")(sequelize, Sequelize);
 db.presskit = require("./presskit.model.js")(sequelize, Sequelize);
 db.presskitI18n = require("./presskit-i18n.model.js")(sequelize, Sequelize);
 db.travoy = require("./travoy.model.js")(sequelize, Sequelize);
+db.pencarian = require("./pencarian.model")(sequelize, Sequelize);
 
 db.users.hasMany(db.tokens, { as: "tokens" });
 db.users.hasMany(db.refresTokens, { as: "refresTokens" });
 db.tokens.belongsTo(db.users, {
   foreignKey: "userId",
   as: "user",
+});
+
+db.roles.hasMany(db.users, { as: "users" });
+db.users.belongsTo(db.roles, {
+  foreignKey: "roleNama",
+  as: "role",
+});
+
+db.roles.hasMany(db.akses, {
+  as: "akses_role",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+db.akses.belongsTo(db.roles, {
+  foreignKey: "roleNama",
+  as: "akses",
 });
 
 db.page.hasMany(db.gallery, {
