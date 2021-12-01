@@ -35,7 +35,7 @@ exports.create = async (req, res) => {
   }
 
   const { i18n, ...info } = req.body;
-  Page.findOne({
+  await Page.findOne({
     where: { slug: postUuid },
   }).then((data) => {
     info["pageSlug"] = postUuid;
