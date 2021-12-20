@@ -14,9 +14,9 @@ exports.validate = (method) => {
     case "createUser": {
       return [
         body("nama_lengkap").exists(),
-        body("alamat_lengkap").exists(),
-        body("jenis_identitas").exists(),
-        body("no_identitas").exists(),
+        // body("alamat_lengkap").exists(),
+        // body("jenis_identitas").exists(),
+        // body("no_identitas").exists(),
         body("pekerjaan").exists(),
         body("email")
           .isEmail()
@@ -34,13 +34,13 @@ exports.validate = (method) => {
             }
           });
         }),
-        body("no_hp").custom((value) => {
-          return User.findOne({ where: { no_hp: value } }).then((user) => {
-            if (user) {
-              return Promise.reject("No HP already in use!");
-            }
-          });
-        }),
+        // body("no_hp").custom((value) => {
+        //   return User.findOne({ where: { no_hp: value } }).then((user) => {
+        //     if (user) {
+        //       return Promise.reject("No HP already in use!");
+        //     }
+        //   });
+        // }),
         body("password").exists(),
         body("roleNama")
           .optional()
@@ -141,6 +141,11 @@ exports.findAll = (req, res) => {
         : null,
       is_verified ? { is_verified: is_verified } : null,
       is_active ? { is_active: is_active } : null,
+      {
+        username: {
+          [Op.not]: 'admin'
+        }
+      },
     ],
   };
 
