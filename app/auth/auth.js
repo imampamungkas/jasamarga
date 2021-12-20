@@ -4,6 +4,7 @@ const JWTstrategy = require("passport-jwt").Strategy;
 const ExtractJWT = require("passport-jwt").ExtractJwt;
 const db = require("../models");
 const User = db.users;
+const Role = db.roles;
 const { Op } = require("sequelize");
 
 passport.use(
@@ -19,6 +20,10 @@ passport.use(
           where: {
             [Op.or]: [{ email: email }, { username: email }],
             [Op.and]: [{ is_active: true }],
+          },
+          include: {
+            model: Role,
+            as: 'role',
           },
         });
         if (!user) {
