@@ -16,7 +16,6 @@ module.exports = (app) => {
   router.post("/login", async (req, res, next) => {
     passport.authenticate("login", async (err, user, info) => {
       try {
-        console.log("hshshsh", err);
         if (err || !user) {
           const error = err ? err : new Error("An error occurred.");
           console.log("hshshsh", error.message);
@@ -29,7 +28,7 @@ module.exports = (app) => {
           const body = {
             _id: user._id,
             email: user.email,
-            role: user.role,
+            roleName: user.role ? user.role.nama : null,
             id: user.id,
             username: user.username,
           };
