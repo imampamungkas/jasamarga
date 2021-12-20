@@ -18,6 +18,9 @@ module.exports = (app) => {
   // Update a Tutorial with id
   router.put("/:id", users.validate("updateUser"), users.update);
 
+  // Update a Tutorial with id
+  router.put("/change-password/:id", users.updatePassword);
+
   // Delete a Tutorial with id
   router.delete("/:id", users.delete);
 

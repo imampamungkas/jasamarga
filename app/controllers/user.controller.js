@@ -243,6 +243,28 @@ exports.update = async (req, res) => {
       });
     });
 };
+// Update a User by the id in the request
+exports.updatePassword = async (req, res) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    res.status(400).json({ errors: errors.array() });
+    return;
+  }
+  const id = req.params.id;
+
+  let { new_password } = req.body;
+  User.findByPk(id)
+    .then(async (data) => {
+      if (data) {
+        data.password = new_password;
+        data.save();
+        res.send({
+          message: "Password was updated successfully.",
+        });
+      }
+    });
+};
 
 // Delete a User with the specified id in the request
 exports.delete = (req, res) => {
