@@ -10,6 +10,10 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING,
         defaultValue: null,
       },
+      link_video: {
+        type: Sequelize.STRING,
+        defaultValue: null,
+      },
       tahun: {
         type: Sequelize.STRING(4),
         defaultValue: null,
