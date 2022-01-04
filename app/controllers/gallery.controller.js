@@ -33,7 +33,7 @@ exports.create = async (req, res) => {
   }
 
   const { i18n, ...gallery } = req.body;
-  gallery["pageSlug"] = pageSlug;
+  gallery["pageSlug"] = pageSlug.toLowerCase();;
   if (req.body.hasOwnProperty("nama_file")) {
     if (req.body.nama_file) {
       var file_name = req.body.nama_file.nama;
@@ -78,7 +78,7 @@ exports.update = async (req, res) => {
   const uuid = req.params.uuid;
 
   const { i18n, ...gallery } = req.body;
-  gallery["pageSlug"] = pageSlug;
+  gallery["pageSlug"] = pageSlug.toLowerCase();;
   if (req.body.hasOwnProperty("nama_file")) {
     if (req.body.nama_file) {
       var file_name = req.body.nama_file.nama;
