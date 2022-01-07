@@ -16,8 +16,6 @@ exports.validate = (method) => {
       return [
         body("nama_lengkap").exists(),
         body("alamat_lengkap").exists(),
-        body("jenis_identitas").exists(),
-        body("no_identitas").exists(),
         body("pekerjaan").exists(),
         body("email")
           .isEmail()
@@ -35,13 +33,6 @@ exports.validate = (method) => {
             }
           });
         }),
-        body("no_hp").custom((value) => {
-          return User.findOne({ where: { no_hp: value } }).then((user) => {
-            if (user) {
-              return Promise.reject("No HP already in use!");
-            }
-          });
-        }),
         body("password").exists(),
       ];
     }
@@ -56,34 +47,14 @@ exports.signup = async (req, res) => {
     res.status(400).json({ errors: errors.array() });
     return;
   }
-  let file_name = null;
-  if (req.body.hasOwnProperty("file_identitas")) {
-    if (req.body.file_identitas) {
-      const file_type = await FileType.fromBuffer(
-        Buffer.from(req.body.file_identitas, "base64")
-      );
-      file_name = Math.floor(Date.now() / 1000) + "." + file_type.ext;
-      let b = Buffer.from(req.body.file_identitas, "base64");
-      fs.writeFile("public/uploads/" + file_name, b, function (err) {
-        if (!err) {
-          console.log("file is created");
-        }
-      });
-    }
-  }
 
   const user = {
     nama_lengkap: req.body.nama_lengkap,
     alamat_lengkap: req.body.alamat_lengkap,
-    jenis_identitas: req.body.jenis_identitas,
-    no_identitas: req.body.no_identitas,
-    file_identitas: file_name,
     pekerjaan: req.body.pekerjaan,
     email: req.body.email,
-    no_hp: req.body.no_hp,
     username: req.body.username,
     password: req.body.password,
-    pekerjaan_lainnya: req.body.pekerjaan_lainnya,
   };
   // Save User in the database
   User.create(user)

@@ -8,43 +8,12 @@ module.exports = (sequelize, Sequelize) => {
     alamat_lengkap: {
       type: Sequelize.TEXT,
     },
-    jenis_identitas: {
-      type: Sequelize.ENUM("KTP", "SIM", "PASPOR"),
-      allowNull: false,
-    },
-    no_identitas: {
-      type: Sequelize.STRING(50),
-      allowNull: false,
-    },
-    file_identitas: {
-      type: Sequelize.STRING,
-    },
-    file_identitas_url: {
-      type: Sequelize.VIRTUAL,
-      get() {
-        return this.file_identitas
-          ? `${process.env.BASE_URL}/uploads/${this.file_identitas}`
-          : null;
-      },
-      set(value) {
-        throw new Error("Do not try to set the `nama_file_url` value!");
-      },
-    },
     pekerjaan: {
       type: Sequelize.STRING,
-    },
-    pekerjaan_lainnya: {
-      type: Sequelize.STRING,
-      allowNull: true,
-      defaultValue: null,
     },
     email: {
       type: Sequelize.STRING,
       allowNull: false,
-      unique: true,
-    },
-    no_hp: {
-      type: Sequelize.STRING(50),
       unique: true,
     },
     username: {
