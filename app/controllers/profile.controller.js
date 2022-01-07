@@ -12,21 +12,6 @@ exports.validate = (method) => {
   switch (method) {
     case "updateUser": {
       return [
-        // body("file_identitas").custom(async (value) => {
-        //   if (!isBase64(value)) {
-        //     return Promise.reject("File is not base 64 format!");
-        //   }
-        //   // const file_type = await FileType.fromBuffer(
-        //   //   Buffer.from(value, "base64")
-        //   // );
-        //   // const allowed_file = ["png", "jpg", "jpeg"];
-        //   // allowed_file.includes(file_type.ext);
-
-        //   // console.log("file_type", file_type);
-        //   // if (!allowed_file.includes(file_type.ext)) {
-        //   //   return Promise.reject("File extension is not alowed!");
-        //   // }
-        // }),
         body("email")
           .isEmail()
           .custom((value) => {
@@ -94,25 +79,6 @@ exports.update = async (req, res) => {
   delete user.role;
   delete user.email;
   delete user.username;
-  console.log(user);
-  if (req.body.hasOwnProperty("file_identitas")) {
-    if (req.body.file_identitas) {
-      const file_type = await FileType.fromBuffer(
-        Buffer.from(req.body.file_identitas, "base64")
-      );
-      let file_name = Math.floor(Date.now() / 1000) + "." + file_type.ext;
-      let b = Buffer.from(req.body.file_identitas, "base64");
-      fs.writeFile("public/uploads/" + file_name, b, function (err) {
-        if (!err) {
-          console.log("file is created");
-        }
-      });
-
-      user["file_identitas"] = file_name;
-    } else {
-      delete user.file_identitas;
-    }
-  }
   User.update(user, {
     where: { id: id },
   })

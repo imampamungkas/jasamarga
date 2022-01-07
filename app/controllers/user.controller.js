@@ -14,9 +14,6 @@ exports.validate = (method) => {
     case "createUser": {
       return [
         body("nama_lengkap").exists(),
-        // body("alamat_lengkap").exists(),
-        // body("jenis_identitas").exists(),
-        // body("no_identitas").exists(),
         body("pekerjaan").exists(),
         body("email")
           .isEmail()
@@ -34,13 +31,6 @@ exports.validate = (method) => {
             }
           });
         }),
-        // body("no_hp").custom((value) => {
-        //   return User.findOne({ where: { no_hp: value } }).then((user) => {
-        //     if (user) {
-        //       return Promise.reject("No HP already in use!");
-        //     }
-        //   });
-        // }),
         body("password").exists(),
         body("roleNama")
           .optional()
@@ -94,20 +84,7 @@ exports.create = async (req, res) => {
   }
 
 
-  const { file_identitas, ...user } = req.body;
-  if (file_identitas != null) {
-    const file_type = await FileType.fromBuffer(
-      Buffer.from(file_identitas, "base64")
-    );
-    let file_name = `${Math.floor(Date.now() / 1000)}.${file_type.ext}`;
-    let b = Buffer.from(file_identitas, "base64");
-    fs.writeFile("public/uploads/" + file_name, b, function (err) {
-      if (!err) {
-        console.log("file is created");
-      }
-    });
-    user["file_identitas"] = file_name;
-  }
+  const user = req.body;
 
   // Save User in the database
   User.create(user)
@@ -204,24 +181,6 @@ exports.update = async (req, res) => {
   const id = req.params.id;
 
   let user = req.body;
-  if (req.body.hasOwnProperty("file_identitas")) {
-    if (req.body.file_identitas) {
-      const file_type = await FileType.fromBuffer(
-        Buffer.from(req.body.file_identitas, "base64")
-      );
-      let file_name = Math.floor(Date.now() / 1000) + "." + file_type.ext;
-      let b = Buffer.from(req.body.file_identitas, "base64");
-      fs.writeFile("public/uploads/" + file_name, b, function (err) {
-        if (!err) {
-          console.log("file is created");
-        }
-      });
-
-      user["file_identitas"] = file_name;
-    } else {
-      delete user.file_identitas;
-    }
-  }
   User.update(user, {
     where: { id: id },
   })
