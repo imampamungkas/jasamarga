@@ -36,6 +36,9 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.INTEGER,
         defaultValue: 0,
       },
+      tanggal: {
+        type: Sequelize.DATEONLY,
+      },
       status: {
         type: Sequelize.ENUM("draft", "publish", "not publish"),
         defaultValue: "draft",
