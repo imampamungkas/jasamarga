@@ -8,12 +8,7 @@ module.exports = (sequelize, Sequelize) => {
         primaryKey: true,
       },
       tipe: {
-        type: Sequelize.ENUM(
-          "utama",
-          "kantor-cabang",
-          "entitas-anak",
-          "entitas-asosiasi"
-        ),
+        type: Sequelize.STRING,
         defaultValue: "utama",
       },
       urutan: {
