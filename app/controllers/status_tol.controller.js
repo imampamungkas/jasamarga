@@ -4,7 +4,6 @@ const Op = db.Sequelize.Op;
 const StatusTol = db.statusTol;
 const StatusTolI18n = db.statusTolI18n;
 
-const { body } = require("express-validator");
 const { validationResult } = require("express-validator");
 
 

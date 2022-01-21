@@ -5,7 +5,6 @@ const Info = db.info;
 const InfoI18n = db.infoI18n;
 const Page = db.page;
 
-const { body } = require("express-validator");
 const { validationResult } = require("express-validator");
 
 

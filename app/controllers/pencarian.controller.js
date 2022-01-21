@@ -1,5 +1,4 @@
 const paginate = require("express-paginate");
-const fs = require("fs");
 const db = require("../models");
 const Pencarian = db.pencarian;
 const Op = db.Sequelize.Op;

@@ -21,7 +21,6 @@ var storage = multer.diskStorage({
   }
 });
 
-const { body } = require("express-validator");
 const { validationResult } = require("express-validator");
 
 exports.validate = (method) => {
