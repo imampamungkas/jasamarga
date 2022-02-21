@@ -27,14 +27,14 @@ passport.use(
           },
         });
         if (!user) {
-          return done(new Error("User not found or not active."), false);
+          return done(new Error("Username/Password tidak sesuai."), false);
         }
         isValid = await user.isValidPassword(password);
         if (!isValid) {
-          return done(new Error("Wrong Password."), false);
+          return done(new Error("Username/Password tidak sesuai.."), false);
         }
         if (user && !user.is_verified) {
-          return done(new Error("User is not verified."), false);
+          return done(new Error("Username/Password tidak sesuai."), false);
         }
         return done(null, user);
       } catch (error) {
