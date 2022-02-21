@@ -4,7 +4,6 @@ const Op = db.Sequelize.Op;
 const Residential = db.residential;
 const ResidentialI18n = db.residentialI18n;
 
-const { body } = require("express-validator");
 const { validationResult } = require("express-validator");
 const regexExpUuid = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi;
 

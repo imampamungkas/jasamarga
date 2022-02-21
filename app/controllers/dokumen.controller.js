@@ -6,7 +6,6 @@ const Dokumen = db.dokumen;
 const DokumenI18n = db.dokumenI18n;
 const Op = db.Sequelize.Op;
 
-const { body } = require("express-validator");
 const { validationResult } = require("express-validator");
 
 exports.validate = (method) => {

@@ -1,5 +1,3 @@
-const FileType = require("file-type");
-const fs = require("fs");
 const db = require("../models");
 const User = db.users;
 const Role = db.roles;

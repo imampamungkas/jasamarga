@@ -4,7 +4,6 @@ const Op = db.Sequelize.Op;
 const Tcd = db.tcd;
 const TcdI18n = db.tcdI18n;
 
-const { body } = require("express-validator");
 const { validationResult } = require("express-validator");
 const regexExpUuid = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi;
 

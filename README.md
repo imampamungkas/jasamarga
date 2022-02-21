@@ -1,4 +1,4 @@
-# backend-eppid
+# backend-web-korporat
 
 Website Backend eppid
 
@@ -151,8 +151,8 @@ https://www.getpostman.com/collections/f5cb4995b14214f84b67
 
    ```
    $cd /var/www
-   $git clone https://github.com/it-jasamarga/backend-eppid.git
-   $cd backend-eppid
+   $git clone https://github.com/it-jasamarga/backend-web-korporat.git
+   $cd backend-web-korporat
    ```
 
 4. Install Package
