@@ -37,6 +37,7 @@ exports.findOne = (req, res) => {
 
   User.findOne({
     where: { id: id },
+    attributes: { exclude: ['password'] },
     include: {
       model: Role,
       as: 'role',

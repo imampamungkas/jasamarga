@@ -129,6 +129,7 @@ exports.findAll = (req, res) => {
     limit: req.query.limit,
     offset: req.skip,
     order: [["createdAt", "DESC"]],
+    attributes: { exclude: ['password'] },
   })
     .then((results) => {
       const itemCount = results.count;
@@ -151,7 +152,7 @@ exports.findAll = (req, res) => {
 exports.findOne = (req, res) => {
   const id = req.params.id;
 
-  User.findByPk(id)
+  User.findByPk(id, { attributes: { exclude: ['password'] } })
     .then((data) => {
       if (data == null) {
         res.status(404).send({
