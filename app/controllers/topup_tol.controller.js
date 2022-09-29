@@ -1,22 +1,22 @@
 //@ts-check
 const db = require("../models");
 const Op = db.Sequelize.Op;
-const StatusTol = db.statusTol;
-const StatusTolI18n = db.statusTolI18n;
+const TopupTol = db.topupTol;
+const TopupTolI18n = db.topupTolI18n;
 
 const { validationResult } = require("express-validator");
 
 
 exports.validate = (method) => {
   switch (method) {
-    case "createStatusTol": {
+    case "createTopupTol": {
       return [
         // body("nama").exists(),
         // body("deskripsi").exists(),
         // body("urutan").exists(),
       ];
     }
-    case "updateStatusTol": {
+    case "updateTopupTol": {
       return [];
     }
   }
@@ -32,16 +32,16 @@ exports.create = async (req, res) => {
     return;
   }
 
-  const { i18n, ...statusTol } = req.body;
-  statusTol["postUuid"] = postUuid;
+  const { i18n, ...topupTol } = req.body;
+  topupTol["postUuid"] = postUuid;
 
   // Save StatusTol in the database
-  StatusTol.create(statusTol)
+  TopupTol.create(topupTol)
     .then(async (data) => {
       if (i18n instanceof Array && i18n.length > 0) {
         for (var i = 0; i < i18n.length; i++) {
-          i18n[i]["statusTolUuid"] = data.uuid;
-          await StatusTolI18n.create(i18n[i]);
+          i18n[i]["topupTolUuid"] = data.uuid;
+          await TopupTolI18n.create(i18n[i]);
         }
         await data.reload({ include: 'i18n' });
       }
@@ -61,9 +61,9 @@ exports.update = async (req, res) => {
   const postUuid = req.params.postUuid;
   const uuid = req.params.uuid;
 
-  const { i18n, ...statusTol } = req.body;
-  statusTol["postUuid"] = postUuid;
-  StatusTol.findByPk(uuid)
+  const { i18n, ...topupTol } = req.body;
+  topupTol["postUuid"] = postUuid;
+  TopupTol.findByPk(uuid)
     .then(async (data) => {
       if (data == null) {
         res.status(404).send({
@@ -73,8 +73,8 @@ exports.update = async (req, res) => {
         if (i18n instanceof Array && i18n.length > 0) {
           for (var i = 0; i < i18n.length; i++) {
             const { lang, ...trans } = i18n[i];
-            const [obj, created] = await StatusTolI18n.findOrCreate({
-              where: { statusTolUuid: uuid, lang: lang },
+            const [obj, created] = await TopupTolI18n.findOrCreate({
+              where: { topupTolUuid: uuid, lang: lang },
               defaults: trans
             });
             if (!created) {
@@ -83,7 +83,7 @@ exports.update = async (req, res) => {
           }
         }
 
-        data.update(statusTol).then(async (result) => {
+        data.update(topupTol).then(async (result) => {
           await result.reload({ include: 'i18n' });
           res.send({
             message: "Data was updated successfully.",
@@ -109,7 +109,7 @@ exports.updateBulk = async (req, res) => {
       const uuid = data[i].uuid;
       delete data[i].uuid;
 
-      var result = await StatusTol.update(data[i], {
+      var result = await TopupTol.update(data[i], {
         where: { uuid: uuid },
       });
       if (result[0] > 0) {
@@ -134,7 +134,7 @@ exports.updateBulk = async (req, res) => {
 exports.delete = (req, res) => {
   const uuid = req.params.uuid;
 
-  StatusTol.findByPk(uuid)
+  TopupTol.findByPk(uuid)
     .then((data) => {
       if (data == null) {
         res.status(404).send({
@@ -159,7 +159,7 @@ exports.delete = (req, res) => {
 // Delete all StatusTol from the database.
 exports.deleteAll = (req, res) => {
   const postUuid = req.params.postUuid;
-  StatusTol.destroy({
+  TopupTol.destroy({
     where: {
       [Op.or]: [
         { postUuid: postUuid },

@@ -7,10 +7,18 @@ const Post = db.post;
 const PostI18n = db.postI18n;
 const Photo = db.photo;
 const PhotoI18n = db.photoI18n;
+const Simpangsusun = db.simpangsusun;
+const SimpangsusunI18n = db.simpangsusunI18n;
+const Arearest = db.arearest;
+const ArearestI18n = db.arearestI18n;
 const Info = db.info;
 const InfoI18n = db.infoI18n;
 const StatusTol = db.statusTol;
 const StatusTolI18n = db.statusTolI18n;
+const TopupTol = db.topupTol;
+const TopupTolI18n = db.topupTolI18n;
+const AlamatTol = db.alamatTol;
+const AlamatTolI18n = db.alamatTolI18n;
 const Op = db.Sequelize.Op;
 
 const { validationResult } = require("express-validator");
@@ -58,6 +66,23 @@ exports.create = async (req, res) => {
         }
       });
       post["nama_file"] = `${timestamp}/${file_name}`;
+    }
+  }
+  if (req.body.hasOwnProperty("nama_file2")) {
+    if (req.body.nama_file2) {
+      var file_name = req.body.nama_file2.nama;
+      const b = Buffer.from(req.body.nama_file2.data, "base64");
+      const timestamp = `post-${tipe}/${new Date().getTime()}`;
+      var dir = `public/uploads/${timestamp}/`;
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      fs.writeFile(dir + file_name, b, function (err) {
+        if (!err) {
+          console.log("file is created", file_name);
+        }
+      });
+      post["nama_file2"] = `${timestamp}/${file_name}`;
     }
   }
   if (req.body.hasOwnProperty("dokumen_file")) {
@@ -120,6 +145,7 @@ exports.findAll = (req, res) => {
             { '$i18n.nama$': { [Op.like]: `%${search}%` } },
             { '$i18n.deskripsi$': { [Op.like]: `%${search}%` } },
             { '$post.nama_file$': { [Op.like]: `%${search}%` } },
+            { '$post.nama_file2$': { [Op.like]: `%${search}%` } },
           ],
         }
         : null,
@@ -140,6 +166,22 @@ exports.findAll = (req, res) => {
       }],
     },
     {
+      model: Simpangsusun,
+      as: 'simpangsusun',
+      include: [{
+        model: SimpangsusunI18n,
+        as: 'i18n',
+      }],
+    },
+    {
+      model: Arearest,
+      as: 'arearest',
+      include: [{
+        model: ArearestI18n,
+        as: 'i18n',
+      }],
+    },
+    {
       model: Info,
       as: 'info',
       order: [["urutan", "ASC"]],
@@ -154,6 +196,22 @@ exports.findAll = (req, res) => {
       as: 'status_tol',
       include: [{
         model: StatusTolI18n,
+        as: 'i18n',
+      }],
+    } : null,
+    postConfig.use_topup_tol.includes(tipe) ? {
+      model: TopupTol,
+      as: 'topup_tol',
+      include: [{
+        model: TopupTolI18n,
+        as: 'i18n',
+      }],
+    } : null,
+    postConfig.use_alamat_tol.includes(tipe) ? {
+      model: AlamatTol,
+      as: 'alamat_tol',
+      include: [{
+        model: AlamatTolI18n,
         as: 'i18n',
       }],
     } : null,
@@ -219,6 +277,22 @@ exports.findOne = (req, res) => {
         }],
       },
       {
+        model: Simpangsusun,
+        as: 'simpangsusun',
+        include: [{
+          model: SimpangsusunI18n,
+          as: 'i18n',
+        }],
+      },
+      {
+        model: Arearest,
+        as: 'arearest',
+        include: [{
+          model: ArearestI18n,
+          as: 'i18n',
+        }],
+      },
+      {
         model: Info,
         as: 'info',
         order: [["urutan", "ASC"]],
@@ -233,6 +307,22 @@ exports.findOne = (req, res) => {
         as: 'status_tol',
         include: [{
           model: StatusTolI18n,
+          as: 'i18n',
+        }],
+      } : null,
+      postConfig.use_topup_tol.includes(tipe) ? {
+        model: TopupTol,
+        as: 'topup_tol',
+        include: [{
+          model: TopupTolI18n,
+          as: 'i18n',
+        }],
+      } : null,
+      postConfig.use_alamat_tol.includes(tipe) ? {
+        model: AlamatTol,
+        as: 'alamat_tol',
+        include: [{
+          model: AlamatTolI18n,
           as: 'i18n',
         }],
       } : null,
@@ -283,6 +373,26 @@ exports.update = async (req, res) => {
     }
   }
 
+  if (req.body.hasOwnProperty("nama_file2")) {
+    if (req.body.nama_file2) {
+      var file_name = req.body.nama_file2.nama;
+      const b = Buffer.from(req.body.nama_file2.data, "base64");
+      const timestamp = `post-${tipe}/${new Date().getTime()}`;
+      var dir = `public/uploads/${timestamp}/`;
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      fs.writeFile(dir + file_name, b, function (err) {
+        if (!err) {
+          console.log("file is created", file_name);
+        }
+      });
+      post["nama_file2"] = `${timestamp}/${file_name}`;
+    } else {
+      delete post.nama_file2;
+    }
+  }
+
   if (req.body.hasOwnProperty("dokumen_file")) {
     if (req.body.dokumen_file) {
       var file_name = req.body.dokumen_file.nama;
@@ -311,6 +421,16 @@ exports.update = async (req, res) => {
       } else {
         if (post.nama_file != null && data.nama_file != null) {
           var dir = data.nama_file.split("/");
+          console.log("dir", dir);
+          var path = `public/uploads/${dir[0]}/${dir[1]}`;
+          fs.rm(path, { recursive: true }, (err) => {
+            if (err) {
+              console.log("err : ", err);
+            }
+          });
+        }
+        if (post.nama_file2 != null && data.nama_file2 != null) {
+          var dir = data.nama_file2.split("/");
           console.log("dir", dir);
           var path = `public/uploads/${dir[0]}/${dir[1]}`;
           fs.rm(path, { recursive: true }, (err) => {
@@ -401,6 +521,15 @@ exports.delete = (req, res) => {
       } else {
         if (data.nama_file != null) {
           var dir = data.nama_file.split("/");
+          var path = `public/uploads/${dir[0]}/${dir[1]}`;
+          fs.rm(path, { recursive: true }, (err) => {
+            if (err) {
+              console.log("err : ", err);
+            }
+          });
+        }
+        if (data.nama_file2 != null) {
+          var dir = data.nama_file2.split("/");
           var path = `public/uploads/${dir[0]}/${dir[1]}`;
           fs.rm(path, { recursive: true }, (err) => {
             if (err) {

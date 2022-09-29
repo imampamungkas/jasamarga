@@ -20,6 +20,9 @@ module.exports = (sequelize, Sequelize) => {
       teks: {
         type: Sequelize.TEXT("long"),
       },
+      info_gerbang: {
+        type: Sequelize.TEXT("long"),
+      },
       visi: {
         type: Sequelize.TEXT,
       },

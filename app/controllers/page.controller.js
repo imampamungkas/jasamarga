@@ -172,6 +172,7 @@ exports.update = async (req, res) => {
           message: "Page was updated successfully.",
           data: result,
         });
+        console.log("err : ", data);
       });
     })
     .catch((err) => {

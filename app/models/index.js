@@ -42,6 +42,10 @@ db.post = require("./post.model.js")(sequelize, Sequelize);
 db.postI18n = require("./post-i18n.model.js")(sequelize, Sequelize);
 db.photo = require("./photo.model.js")(sequelize, Sequelize);
 db.photoI18n = require("./photo-i18n.model.js")(sequelize, Sequelize);
+db.arearest = require("./arearest.model.js")(sequelize, Sequelize);
+db.arearestI18n = require("./arearest-i18n.model.js")(sequelize, Sequelize);
+db.simpangsusun = require("./simpangsusun.model.js")(sequelize, Sequelize);
+db.simpangsusunI18n = require("./simpangsusun-i18n.model.js")(sequelize, Sequelize);
 db.info = require("./info.model.js")(sequelize, Sequelize);
 db.infoI18n = require("./info-i18n.model.js")(sequelize, Sequelize);
 db.tcd = require("./tcd.model.js")(sequelize, Sequelize);
@@ -52,6 +56,10 @@ db.residential = require("./residential.model")(sequelize, Sequelize);
 db.residentialI18n = require("./residential-i18n.model")(sequelize, Sequelize);
 db.statusTol = require("./status_tol.model.js")(sequelize, Sequelize);
 db.statusTolI18n = require("./status_tol-i18n.model.js")(sequelize, Sequelize);
+db.alamatTol = require("./alamat_tol.model.js")(sequelize, Sequelize);
+db.alamatTolI18n = require("./alamat_tol-i18n.model.js")(sequelize, Sequelize);
+db.topupTol = require("./topup_tol.model.js")(sequelize, Sequelize);
+db.topupTolI18n = require("./topup_tol-i18n.model.js")(sequelize, Sequelize);
 db.dokumen = require("./dokumen.model.js")(sequelize, Sequelize);
 db.dokumenI18n = require("./dokumen-i18n.model.js")(sequelize, Sequelize);
 db.presskit = require("./presskit.model.js")(sequelize, Sequelize);
@@ -100,6 +108,24 @@ db.photo.belongsTo(db.post, {
   as: "post",
 });
 
+db.post.hasMany(db.simpangsusun, {
+  as: "simpangsusun",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+db.simpangsusun.belongsTo(db.post, {
+  as: "post",
+});
+
+db.post.hasMany(db.arearest, {
+  as: "arearest",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+db.arearest.belongsTo(db.post, {
+  as: "post",
+});
+
 db.post.hasMany(db.info, {
   as: "info",
   onDelete: "CASCADE",
@@ -115,6 +141,24 @@ db.post.hasMany(db.statusTol, {
   onUpdate: "CASCADE",
 });
 db.statusTol.belongsTo(db.post, {
+  as: "post",
+});
+
+db.post.hasMany(db.topupTol, {
+  as: "topup_tol",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+db.topupTol.belongsTo(db.post, {
+  as: "post",
+});
+
+db.post.hasMany(db.alamatTol, {
+  as: "alamat_tol",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+db.alamatTol.belongsTo(db.post, {
   as: "post",
 });
 
@@ -236,6 +280,24 @@ db.photoI18n.belongsTo(db.photo, {
   as: "photo",
 });
 
+db.simpangsusun.hasMany(db.simpangsusunI18n, {
+  as: "i18n",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+db.simpangsusunI18n.belongsTo(db.simpangsusun, {
+  as: "simpangsusun",
+});
+
+db.arearest.hasMany(db.arearestI18n, {
+  as: "i18n",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+db.arearestI18n.belongsTo(db.arearest, {
+  as: "arearest",
+});
+
 db.info.hasMany(db.infoI18n, {
   as: "i18n",
   onDelete: "CASCADE",
@@ -279,6 +341,24 @@ db.statusTol.hasMany(db.statusTolI18n, {
 });
 db.statusTolI18n.belongsTo(db.statusTol, {
   as: "status_tol",
+});
+
+db.topupTol.hasMany(db.topupTolI18n, {
+  as: "i18n",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+db.topupTolI18n.belongsTo(db.topupTol, {
+  as: "topup_tol",
+});
+
+db.alamatTol.hasMany(db.alamatTolI18n, {
+  as: "i18n",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+db.alamatTolI18n.belongsTo(db.alamatTol, {
+  as: "alamat_tol",
 });
 
 db.dokumen.hasMany(db.dokumenI18n, {

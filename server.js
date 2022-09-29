@@ -1,4 +1,4 @@
-//@ts-check
+// @ts-nocheck
 require("dotenv").config();
 const express = require("express");
 const paginate = require("express-paginate");
@@ -64,11 +64,15 @@ require("./app/routes/page.routes")(app);
 require("./app/routes/gallery.routes")(app);
 require("./app/routes/post.routes")(app);
 require("./app/routes/photo.routes")(app);
+require("./app/routes/simpangsusun.routes")(app);
+require("./app/routes/arearest.routes")(app);
 require("./app/routes/info.routes")(app);
 require("./app/routes/tcd.routes")(app);
 require("./app/routes/rest_area.routes")(app);
 require("./app/routes/residential.routes")(app);
 require("./app/routes/status_tol.routes")(app);
+require("./app/routes/alamat_tol.routes")(app);
+require("./app/routes/topup_tol.routes")(app);
 require("./app/routes/pencarian.routes")(app);
 var upload = require("./upload.js");
 app.post("/upload", upload);

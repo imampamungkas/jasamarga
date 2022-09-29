@@ -37,6 +37,28 @@ module.exports = (sequelize, Sequelize) => {
           throw new Error("Do not try to set the `nama_file_url` value!");
         },
       },
+      nama_file2: {
+        type: Sequelize.STRING,
+        get() {
+          const rawValue = this.getDataValue('nama_file2');
+          if (rawValue) {
+            const tmpValue = rawValue.split('/');
+            return tmpValue[tmpValue.length - 1];
+          }
+          return null;
+        }
+      },
+      nama_file2_url: {
+        type: Sequelize.VIRTUAL,
+        get() {
+          return this.nama_file2
+            ? `${process.env.BASE_URL}/uploads/${this.getDataValue('nama_file2')}`
+            : null;
+        },
+        set(value) {
+          throw new Error("Do not try to set the `nama_file2_url` value!");
+        },
+      },
       dokumen_file: {
         type: Sequelize.STRING,
         get() {

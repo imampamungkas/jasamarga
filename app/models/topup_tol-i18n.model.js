@@ -1,8 +1,8 @@
 module.exports = (sequelize, Sequelize) => {
-  const PostI18n = sequelize.define(
-    "post_i18n",
+  const TopupTolI18n = sequelize.define(
+    "topup_tol_i18n",
     {
-      postUuid: {
+      topupTolUuid: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
@@ -18,36 +18,24 @@ module.exports = (sequelize, Sequelize) => {
       deskripsi: {
         type: Sequelize.TEXT,
       },
-      teks: {
-        type: Sequelize.TEXT("long"),
-      },
-      teks2: {
-        type: Sequelize.TEXT("long"),
-      },
-      status_ruas_jalan: {
-        type: Sequelize.TEXT,
-      },
-      bujt: {
-        type: Sequelize.STRING,
-      },
       panjang: {
         type: Sequelize.STRING,
       },
-      alamat: {
-        type: Sequelize.TEXT,
-      },
-      nama_usaha: {
+      status: {
         type: Sequelize.STRING,
       },
-      kategori_usaha: {
+      status_pembebasan: {
+        type: Sequelize.STRING,
+      },
+      status_konstruksi: {
         type: Sequelize.STRING,
       },
     },
     {
-      tableName: "post_i18n",
+      tableName: "topup_tol_i18n",
       timestamps: false,
     }
   );
 
-  return PostI18n;
+  return TopupTolI18n;
 };
